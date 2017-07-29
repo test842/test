@@ -4,8 +4,8 @@ import java.util.List;
 
 public interface TagDetailDAO {
 
-	boolean insert(TagDetailBean bean);
-	boolean delete(TagDetailBean bean);
+	boolean insert(Integer aid,Integer tid);
+	boolean delete(Integer aid,Integer tid);
 	List<TagDetailBean> selectByAid(Integer aid);
-	TagDetailBean select(TagDetailBean bean);
+	TagDetailBean select(Integer aid,Integer tid);
 }

@@ -16,17 +16,17 @@ public class TagDetailService {
 	private TagDetailDAO tagDetailDao;
 	
 	@Transactional(propagation = Propagation.MANDATORY)
-	public boolean insert(TagDetailBean bean) {
-		if (bean != null) {
-			return tagDetailDao.insert(bean);
+	public boolean insert(Integer aid, Integer tid) {
+		if (aid != null && tid != null) {
+			return tagDetailDao.insert(aid, tid);
 		}
 		return false;
 	}
 	
 	@Transactional(propagation = Propagation.MANDATORY)
-	public boolean delete(TagDetailBean bean) {
-		if (bean != null) {
-			return tagDetailDao.delete(bean);
+	public boolean delete(Integer aid, Integer tid) {
+		if (aid != null && tid != null) {
+			return tagDetailDao.delete(aid, tid);
 		}
 		return false;
 	}
@@ -40,9 +40,9 @@ public class TagDetailService {
 	}
 	
 	@Transactional(readOnly = true)
-	public TagDetailBean select(TagDetailBean bean) {
-		if (bean != null) {
-			return tagDetailDao.select(bean);
+	public TagDetailBean select(Integer aid, Integer tid) {
+		if (aid != null && tid != null) {
+			return tagDetailDao.select(aid, tid);
 		}
 		return null;
 	}

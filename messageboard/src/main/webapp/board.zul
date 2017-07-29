@@ -6,7 +6,7 @@
 		hflex="1" vflex="1" contentStyle="overflow:auto">
 		<borderlayout>
 			<north height="160px"
-				visible="@load(empty vm.currentNode)">
+				visible="@load(empty vm.currentArticle)">
 				<hlayout>
 					<template name="top" src="/top.zul" />
 					<apply template="top"
@@ -20,207 +20,35 @@
 				</hlayout>
 			</north>
 			<center>
-				<window>
-					<radiogroup
-						onCheck="@command('check', item=self.selectedItem.value)">
-						<radio label="${labels.tree}" value="tree"
-							selected="true" />
-						<radio label="${labels.list}" value="list" />
-					</radiogroup>
-					<tree model="@load(vm.articlesModel)" height="250px"
-						selectedItem="@bind(vm.currentNode)"
-						visible="@load(vm.treeview)">
-						<treecols>
-							<treecol label="${labels.title}" />
-							<treecol label="${labels.date}" />
-						</treecols>
-						<template name="model">
-							<treeitem>
-								<treerow>
-									<treecell
-										label="@load(each.data.title)" />
-									<treecell
-										label="@load(each.data.date)" />
-								</treerow>
-							</treeitem>
-						</template>
-					</tree>
-					<listbox model="@load(vm.allTopics)" hflex="1"
-						height="250px"
-						onSelect="@command('doSelect', index = self.selectedIndex)"
-						visible="@load(!vm.treeview)">
-						<listhead>
-							<listheader label="${labels.title}"
-								hflex="1" />
-							<listheader label="${labels.date}"
-								hflex="1" />
-						</listhead>
-						<template name="model">
-							<listitem>
-								<listcell label="@load(each.title)" />
-								<listcell label="@load(each.date)" />
-							</listitem>
-						</template>
-					</listbox>
-				</window>
+				<apply templateURI="/center.zul" />
 			</center>
-			<east visible="@load(not empty vm.currentNode)" size="70%"
-				style="overflow: auto">
+			<east visible="@load(not empty vm.currentArticle)" size="70%" autoscroll="true">
 				<vlayout>
-					<template name="artilce" src="/article.zul" />
-					<apply template="article"
-						node="@ref(vm.currentNode)" user="@ref(vm.user)" />
-					<tree model="@load(vm.currentArticleTreeModel)"
-						rows="2" nonselectableTags="*"
-						visible="@load(not empty vm.currentNode.data.replies and !vm.treeview)">
-						<treecols>
-							<treecol label="reply" />
-						</treecols>
-						<template name="model">
-							<treeitem>
-								<treerow>
-									<treecell>
-										<grid width="400px"
-											style="display: inline-block">
-											<columns>
-												<column align="right"
-													hflex="min" />
-												<column />
-											</columns>
-											<rows>
-												<row>
-													<cell
-														sclass="row-title">
-														${labels.title}
-														:
-													</cell>
-													<cell>
-														<label
-															value="@load(each.data.title)" />
-													</cell>
-												</row>
-												<row>
-													<cell
-														sclass="row-title">
-														${labels.author}
-														:
-													</cell>
-													<cell>
-														<label
-															value="@load(each.data.userBean.name)" />
-													</cell>
-												</row>
-												<row>
-													<cell
-														sclass="row-title">
-														${labels.date} :
-													</cell>
-													<cell>
-														<label
-															value="@load(each.data.date)" />
-													</cell>
-												</row>
-												<row>
-													<cell
-														sclass="row-title">
-														${labels.tags} :
-													</cell>
-													<cell>
-														<label
-															value="@load(each.data.tags)" />
-													</cell>
-												</row>
-												<row>
-													<cell
-														sclass="row-title">
-														${labels.content}
-														:
-													</cell>
-													<cell>
-														<html
-															content="@load(each.data.content)" />
-													</cell>
-												</row>
-												<row>
-													<cell />
-													<cell>
-														<button
-															label="${labels.reply}"
-															onClick="@command('reply', node = each)" />
-														<button
-															visible="@load((empty each.data.replies) and (vm.user.uid eq each.data.userBean.uid))"
-															label="${labels.edit}"
-															onClick="@command('edit', node = each)" />
-														<button
-															visible="@load(vm.user.uid eq each.data.userBean.uid)"
-															label="${labels.delete}"
-															onClick="@command('delete', node = each)" />
-													</cell>
-												</row>
-											</rows>
-										</grid>
-									</treecell>
-								</treerow>
-							</treeitem>
+					<template name="article" src="/article.zul" />
+					<apply template="article" article="@ref(vm.currentArticle)" left="0"/>
+					<if test="@load((vm.view == 1) and (not empty vm.currentArticle.replies))">
+						<template name="articleTree">
+							<forEach items="@load(articles)">
+								<choose>
+									<when test="@load(empty each.replies)">
+										<apply template="article" article="@ref(each)" left="@ref(left + 50)"/>
+									</when>
+									<otherwise>
+										<apply template="sub" article="@ref(each)" left="@ref(left + 50)"/>
+									</otherwise>
+								</choose>
+							</forEach>
 						</template>
-					</tree>
+						<template name="sub">
+							<apply template="article" article="@ref(each)" left="@ref(left)"/>
+							<apply template="articleTree" articles="@ref(each.replies)" left="@ref(left)"/>
+						</template>
+						<apply template="articleTree" articles="@ref(vm.currentArticle.replies)" left="0"/>
+					</if>
 				</vlayout>
 			</east>
-			<south size="50%" autoscroll="true">
-				<grid
-					form="@id('fx') @load(vm.newArticle) @save(vm.newArticle, before='post')">
-					<columns>
-						<column align="right" hflex="min" />
-						<column />
-					</columns>
-					<rows>
-						<row
-							visible="@load(not empty fx.parent.parent)">
-							<cell sclass="row-title">
-								${labels.replyTo} :
-							</cell>
-							<cell>
-								<label value="@load(fx.parent.title)" />
-							</cell>
-						</row>
-						<row>
-							<cell sclass="row-title">
-								${labels.title} :
-							</cell>
-							<cell>
-								<textbox value="@bind(fx.title)" />
-							</cell>
-						</row>
-						<row>
-							<cell sclass="row-title">
-								${labels.tags} :
-							</cell>
-							<cell>
-								<textbox
-									value="@load(fx.tags) @save(vm.tags, before='post')" />
-							</cell>
-						</row>
-						<row>
-							<cell sclass="row-title">
-								${labels.content} :
-							</cell>
-							<cell>
-								<ckeditor value="@bind(fx.content)" />
-							</cell>
-						</row>
-						<row>
-							<cell>
-								<button label="${labels.reset}"
-									onClick="@command('reset')" />
-							</cell>
-							<cell>
-								<button
-									label="@load(empty vm.schedule ? labels.submit : labels.cancel)"
-									onClick="@command('post')" />
-							</cell>
-						</row>
-					</rows>
-				</grid>
+			<south size="50%" autoscroll="true" visible="@load(not empty vm.newArticle)">
+				<apply templateURI="/input.zul" />
 			</south>
 		</borderlayout>
 	</window>

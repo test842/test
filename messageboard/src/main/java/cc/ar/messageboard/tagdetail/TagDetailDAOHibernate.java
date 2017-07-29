@@ -21,8 +21,11 @@ public class TagDetailDAOHibernate implements TagDetailDAO {
 	}
 
 	
-	public boolean insert(TagDetailBean bean) {
-		if (bean != null) {
+	public boolean insert(Integer aid,Integer tid) {
+		if (aid != null && tid != null) {
+			TagDetailBean bean = new TagDetailBean();
+			bean.setAid(aid);
+			bean.setTid(tid);
 			getSession().save(bean);
 			return true;
 		}
@@ -30,10 +33,9 @@ public class TagDetailDAOHibernate implements TagDetailDAO {
 	}
 
 
-	public boolean delete(TagDetailBean bean) {
-		if (bean != null) {
-			getSession().delete(bean);
-			return true;
+	public boolean delete(Integer aid,Integer tid) {
+		if (aid != null && tid != null) {
+			return getSession().createQuery("delete from TagDetailBean where aid = ? and tid = ?", TagDetailBean.class).setParameter(0, aid).setParameter(1, tid).executeUpdate() == 1;
 		}
 		return false;
 	}
@@ -46,9 +48,9 @@ public class TagDetailDAOHibernate implements TagDetailDAO {
 	}
 
 
-	public TagDetailBean select(TagDetailBean bean) {
-		if (bean != null)
-			return getSession().createQuery("from TagDetailBean where aid = ? and tid = ?", TagDetailBean.class).setParameter(0, bean.getAid()).setParameter(1, bean.getTid()).uniqueResult();
+	public TagDetailBean select(Integer aid,Integer tid) {
+		if (aid != null && tid != null)
+			return getSession().createQuery("from TagDetailBean where aid = ? and tid = ?", TagDetailBean.class).setParameter(0, aid).setParameter(1, tid).uniqueResult();
 		return null;
 	}
 

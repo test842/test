@@ -11,38 +11,34 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import cc.ar.messageboard.tag.TagBean;
-import cc.ar.messageboard.tag.TagService;
 import cc.ar.messageboard.tagdetail.TagDetailBean;
 import cc.ar.messageboard.tagdetail.TagDetailService;
 
 @Service
-@Scope(value="singleton",proxyMode=ScopedProxyMode.TARGET_CLASS)
+@Scope(value = "singleton", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class ArticleService {
 	@Autowired
 	private ArticleDAO articleDao;
-	
-	@Autowired
-	private TagService tagService;
-	
+
 	@Autowired
 	private TagDetailService tagDetailService;
-	
+
 	@Transactional
-	public boolean insert(ArticleBean bean, String tags) {
+	public boolean insert(ArticleBean bean, Set<TagBean> tags) {
 		if (bean != null) {
 			return articleDao.insert(bean) && editTags(tags, bean);
 		}
 		return false;
 	}
-	
+
 	@Transactional
-	public boolean update(ArticleBean bean, String tags) {
+	public boolean update(ArticleBean bean, Set<TagBean> tags) {
 		if (bean != null && articleDao.selectReplies(bean.getAid()).isEmpty()) {
 			return articleDao.update(bean) && editTags(tags, bean);
 		}
 		return false;
 	}
-	
+
 	@Transactional
 	public boolean delete(Integer aid) {
 		if (aid != null) {
@@ -53,21 +49,20 @@ public class ArticleService {
 		}
 		return false;
 	}
-	
+
 	@Transactional(readOnly = true)
 	public List<ArticleBean> selectByUid(Integer uid) {
 		if (uid != null) {
-			return articleDao.selectByUid(uid); 
+			return articleDao.selectByUid(uid);
 		}
 		return null;
 	}
-	
+
 	@Transactional(readOnly = true)
 	public List<ArticleBean> selectRecent(boolean isReply) {
-		List<ArticleBean> list = articleDao.select(isReply);
-		return list.subList(0, Math.min(list.size(), 10));
+		return articleDao.selectRecent(isReply);
 	}
-	
+
 	@Transactional(readOnly = true)
 	public List<ArticleBean> selectReplies(Integer ref) {
 		if (ref != null) {
@@ -75,37 +70,36 @@ public class ArticleService {
 		}
 		return null;
 	}
-	
+
 	@Transactional(readOnly = true)
 	public List<ArticleBean> select(boolean isReply) {
 		return articleDao.select(isReply);
 	}
-	
+
 	@Transactional(readOnly = true)
 	public ArticleBean select(Integer aid) {
 		return articleDao.select(aid);
 	}
-	
-	private boolean editTags(String tags, ArticleBean article) { 
+
+	private boolean editTags(Set<TagBean> tags, ArticleBean article) {
 		if (article != null) {
-			Set<TagDetailBean> oldTags = new HashSet<TagDetailBean>(tagDetailService.selectByAid(article.getAid()));
+			Integer aid = article.getAid();
+			Set<Integer> oldTags = new HashSet<Integer>();
+			for (TagDetailBean oldTag : tagDetailService.selectByAid(article.getAid()))
+				oldTags.add(oldTag.getTid());
 			
-			if (tags != null && tags.trim().length() > 0)
-				for (String tag : tags.trim().split(" ")) {
-					TagDetailBean bean = new TagDetailBean();
-					bean.setAid(article.getAid());
-					TagBean tagBean = tagService.selectByTagName(tag);
-					if (tagBean == null) 
-						tagBean = tagService.insert(tag);
-					bean.setTid(tagBean.getTid());
-					if (!oldTags.contains(bean)) 			
-						tagDetailService.insert(bean);
-					oldTags.remove(bean);
-				}
-			for (TagDetailBean oldTag : oldTags) {
-				tagDetailService.delete(oldTag);
+			for (TagBean tag : tags) {
+				Integer tid = tag.getTid();
+				if (!oldTags.contains(tid)) {
+					tagDetailService.insert(aid, tid);
+				}	
+				oldTags.remove(tid);
 			}
+			for (Integer tid : oldTags) {
+				tagDetailService.delete(aid, tid);
+			}
+			return true;
 		}
-		return true;
+		return false;
 	}
 }

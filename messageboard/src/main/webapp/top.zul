@@ -4,13 +4,11 @@
 	</auxhead>
 	<columns>
 		<column label="${labels.title}" hflex="5" />
-		<column label="${labels.author}" hflex="1" />
-		<column label="${labels.date}" hflex="3" />
+		<column label="${labels.date}" hflex="2" />
 	</columns>
 	<template name="model">
 		<row>
 			<label value="@load(each.title)" />
-			<label value="@load(each.userBean.name)" />
 			<label value="@load(each.date)" />
 		</row>
 	</template>

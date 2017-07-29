@@ -21,4 +21,11 @@ public class UserService {
 		}
 		return null;
 	}
+	
+	@Transactional(readOnly = true)
+	public UserBean selectByUid(Integer uid) {
+		if (uid != null)
+			return userDao.select(uid);
+		return null;
+	}
 }

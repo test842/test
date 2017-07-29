@@ -1,4 +1,4 @@
-<grid>
+<grid left="@load(left)px">
 	<auxhead>
 		<auxheader colspan="2" label="${labels.topic}" />
 	</auxhead>
@@ -10,46 +10,46 @@
 		<row>
 			<cell sclass="row-title">${labels.title} :</cell>
 			<cell>
-				<label value="@load(node.data.title)" />
+				<label value="@load(article.title)" />
 			</cell>
 		</row>
 		<row>
 			<cell sclass="row-title">${labels.author} :</cell>
 			<cell>
-				<label value="@load(node.data.userBean.name)" />
+				<label value="@load(article.user.name)" />
 			</cell>
 		</row>
 		<row>
 			<cell sclass="row-title">${labels.date} :</cell>
 			<cell>
-				<label value="@load(node.data.date)" />
+				<label value="@load(article.date)" />
 			</cell>
 		</row>
 		<row>
 			<cell sclass="row-title">${labels.tags} :</cell>
 			<cell>
-				<label value="@load(node.data.tags)" />
+				<label value="@load(article.tags)" />
 			</cell>
 		</row>
 		<row>
 			<cell sclass="row-title">${labels.content} :</cell>
 			<cell>
-				<html content="@load(node.data.content)" />
+				<html content="@load(article.content)" />
 			</cell>
 		</row>
 		<row>
 			<cell />
 			<cell>
 				<button label="${labels.reply}"
-					onClick="@command('reply', node = node)" />
+					onClick="@command('reply', article = article)" />
 				<button
-					visible="@load((empty node.data.replies) and (user.uid eq node.data.userBean.uid))"
+					visible="@load((empty article.replies) and (vm.currentUser.uid eq article.user.uid))"
 					label="${labels.edit}"
-					onClick="@command('edit', node = node)" />
+					onClick="@command('edit',  article = article)" />
 				<button
-					visible="@load(user.uid eq node.data.userBean.uid)"
+					visible="@load(vm.currentUser.uid eq article.user.uid)"
 					label="${labels.delete}"
-					onClick="@command('delete', node = node)" />
+					onClick="@command('delete',  article = article)" />
 				<button label="${labels.close}"
 					onClick="@command('close')" />
 			</cell>

@@ -1,0 +1,51 @@
+<grid
+	form="@id('fx') @load(vm.newArticle) @save(vm.newArticle, before='post')">
+	<columns>
+		<column align="right" hflex="min" />
+		<column />
+	</columns>
+	<rows>
+		<row visible="@load((fx.ref != 0))">
+			<cell sclass="row-title">${labels.replyTo} :</cell>
+			<cell>
+				<label value="@load(fx.parent.title)" />
+			</cell>
+		</row>
+		<row>
+			<cell sclass="row-title">${labels.title} :</cell>
+			<cell>
+				<textbox value="@bind(fx.title)" />
+			</cell>
+		</row>
+		<row>
+			<cell sclass="row-title">${labels.tags} :</cell>
+			<cell>
+				<chosenbox model="@load(vm.tagsModel)" selectedObjects="@bind(vm.tags)">
+					<template name="model">
+						${each.tagname}
+					</template>
+				</chosenbox>
+			</cell>
+		</row>
+		<row>
+			<cell sclass="row-title">${labels.content} :</cell>
+			<cell>
+				<ckeditor value="@bind(fx.content)" />
+			</cell>
+		</row>
+		<row>
+			<cell>
+				<button label="${labels.reset}"
+					onClick="@command('newPost')" />
+			</cell>
+			<cell>
+				<button label="@load(labels.submit)"
+					onClick="@command('post')" disabled="@load(not empty vm.schedule)" />
+				<if test="@load(not empty vm.schedule)">
+					<button label="@load(labels.cancel)"
+						onClick="@command('cancel')" />
+				</if>
+			</cell>
+		</row>
+	</rows>
+</grid>

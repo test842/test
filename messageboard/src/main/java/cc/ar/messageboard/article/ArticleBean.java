@@ -11,6 +11,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import cc.ar.messageboard.user.UserBean;
+
 @Entity
 @Table(name = "ARTICLE")
 public class ArticleBean {
@@ -25,6 +27,16 @@ public class ArticleBean {
 	
 	private Integer uid;
 	
+	@Transient
+	private ArticleBean parent;
+	
+	public ArticleBean getParent() {
+		return parent;
+	}
+	public void setParent(ArticleBean parent) {
+		this.parent = parent;
+	}
+
 	@Column(insertable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private java.util.Date date;
@@ -32,6 +44,16 @@ public class ArticleBean {
 	@Column(insertable = false)
 	private Boolean visible;
 	
+	@Transient
+	private UserBean user;
+	
+	public UserBean getUser() {
+		return user;
+	}
+	public void setUser(UserBean user) {
+		this.user = user;
+	}
+
 	@Transient
 	private List<ArticleBean> replies; 
 	

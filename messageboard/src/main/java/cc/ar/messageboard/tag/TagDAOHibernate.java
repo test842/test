@@ -1,5 +1,7 @@
 package cc.ar.messageboard.tag;
 
+import java.util.List;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,10 @@ public class TagDAOHibernate implements TagDAO {
 			return bean;
 		}
 		return null;
+	}
+
+	public List<TagBean> select() {
+		return getSession().createQuery("from TagBean", TagBean.class).list();
 	}
 
 }

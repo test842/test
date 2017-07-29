@@ -10,6 +10,7 @@ public interface ArticleDAO {
 	List<ArticleBean> selectByUid(Integer uid);
 	List<ArticleBean> selectReplies(Integer ref);
 	List<ArticleBean> select(boolean isReply);
+	List<ArticleBean> selectRecent(boolean isReply);
 	ArticleBean select(Integer aid);
 
 }

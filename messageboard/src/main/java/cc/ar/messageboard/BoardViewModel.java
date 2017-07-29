@@ -1,9 +1,9 @@
 package cc.ar.messageboard;
 
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -21,18 +21,18 @@ import org.zkoss.zk.ui.event.EventQueue;
 import org.zkoss.zk.ui.event.EventQueues;
 import org.zkoss.zk.ui.select.annotation.VariableResolver;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
-import org.zkoss.zul.DefaultTreeModel;
 import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.TreeModel;
-import org.zkoss.zul.TreeNode;
 
 import cc.ar.messageboard.article.ArticleBean;
 import cc.ar.messageboard.article.ArticleService;
-import cc.ar.messageboard.article.ArticleTreeNode;
+import cc.ar.messageboard.article.ArticleTreeModel;
+import cc.ar.messageboard.tag.TagBean;
 import cc.ar.messageboard.tag.TagService;
 import cc.ar.messageboard.tagdetail.TagDetailBean;
 import cc.ar.messageboard.tagdetail.TagDetailService;
 import cc.ar.messageboard.user.UserBean;
+import cc.ar.messageboard.user.UserService;
 
 @VariableResolver(org.zkoss.zkplus.spring.DelegatingVariableResolver.class)
 public class BoardViewModel {
@@ -46,217 +46,134 @@ public class BoardViewModel {
 	@WireVariable
 	private ArticleService articleService;
 
-	private TreeModel<TreeNode<ArticleBean>> articleTreeModel;
+	@WireVariable
+	private UserService userService;
 
-	private TreeModel<TreeNode<ArticleBean>> currentArticleTreeModel;
+	private TreeModel<ArticleBean> articleTreeModel;
 
-	private TreeNode<ArticleBean> articleTreeNode;
-
-	private TreeNode<ArticleBean> currentNode;
-
-	private TreeNode<ArticleBean> targetNode;
+	private ArticleBean currentArticle;
 
 	private ArticleBean root;
 
-	private UserBean userBean;
+	private UserBean currentUser;
 
 	private ArticleBean newArticle;
 
-	private String tags;
-
-	private EventQueue<Event> post;
+	private EventQueue<Event> eventQueue;
 
 	private ScheduledExecutorService scheduler;
 
 	private ListModelList<ArticleBean> allTopics;
 
-	private ScheduledFuture<?> schedule; //
+	private ScheduledFuture<?> schedule;
 
-	public void setCurrentNode(TreeNode<ArticleBean> currentNode) {
-		this.currentNode = currentNode;
+	private List<ArticleBean> recentTopics;
+
+	private List<ArticleBean> recentReplies;
+
+	private List<ArticleBean> relateArticles;
+
+	private int view;
+
+	private List<TagBean> tagsModel;
+
+	private HashMap<Integer, TagBean> tagMap;
+
+	private Set<TagBean> tags;
+
+	public void setView(int view) {
+		this.view = view;
 	}
 
-	public TreeNode<ArticleBean> getCurrentNode() {
-		return currentNode;
-	}
-
-	public ScheduledFuture<?> getSchedule() {
-		return schedule;
-	}
-
-	public void setTags(String tags) {
-		this.tags = tags;
-	}
-	
-	public String getTags() {
+	public Set<TagBean> getTags() {
 		return tags;
 	}
 
-	public TreeModel<TreeNode<ArticleBean>> getCurrentArticleTreeModel() {
-		return currentArticleTreeModel;
+	public void setTags(Set<TagBean> tags) {
+		this.tags = tags;
+	}
+
+	public UserBean getCurrentUser() {
+		return currentUser;
+	}
+
+	public List<TagBean> getTagsModel() {
+		return tagsModel;
+	}
+
+	public int getView() {
+		return view;
+	}
+
+	public ArticleBean getCurrentArticle() {
+		return currentArticle;
+	}
+
+	public void setCurrentArticle(ArticleBean currentArticle) {
+		this.currentArticle = currentArticle;
 	}
 
 	public ArticleBean getNewArticle() {
 		return newArticle;
 	}
 
-	public void setNewArticle(ArticleBean bean) {
-		newArticle = bean;
+	public void setNewArticle(ArticleBean newArticle) {
+		this.newArticle = newArticle;
 	}
 
-	private boolean treeview;
-
-	public UserBean getUser() {
-		return userBean;
-	}
-
-	public boolean isTreeview() {
-		return treeview;
-	}
-
-	public TreeModel<TreeNode<ArticleBean>> getArticlesModel() {
+	public TreeModel<ArticleBean> getArticleTreeModel() {
 		return articleTreeModel;
-	}
-
-	public List<ArticleBean> getRecentTopics() { //
-		return articleService.selectRecent(false);
-	}
-
-	public List<ArticleBean> getRecentReplies() {
-		return articleService.selectRecent(true);
-	}
-
-	public List<ArticleBean> getRelateArticles() {
-		List<ArticleBean> list = articleService.selectByUid(userBean.getUid());
-		return list.subList(0, Math.min(list.size(), 10));
 	}
 
 	public ListModelList<ArticleBean> getAllTopics() {
 		return allTopics;
 	}
 
+	public ScheduledFuture<?> getSchedule() {
+		return schedule;
+	}
+
+	public List<ArticleBean> getRecentTopics() {
+		return recentTopics;
+	}
+
+	public List<ArticleBean> getRecentReplies() {
+		return recentReplies;
+	}
+
+	public List<ArticleBean> getRelateArticles() {
+		return relateArticles;
+	}
+
 	@Init
 	public void init() {
-		userBean = (UserBean) Sessions.getCurrent().getAttribute("currentUser");
+		currentUser = (UserBean) Sessions.getCurrent().getAttribute("currentUser");
 		root = articleService.selectByUid(0).get(0);
-		articleTreeNode = constructTreeNode(root);
-		articleTreeModel = new DefaultTreeModel<ArticleBean>(articleTreeNode);
-		targetNode = articleTreeNode;
+		view = 0;
+
+		recentReplies = articleService.selectRecent(true);
+		recentTopics = articleService.selectRecent(false);
+		List<ArticleBean> relateList = articleService.selectByUid(currentUser.getUid());
+		relateArticles = relateList.subList(0, Math.min(relateList.size(), 10));
+
+		List<TagBean> tagList = tagService.select();
+		tagMap = new HashMap<Integer, TagBean>();
+		for (TagBean tag : tagList)
+			tagMap.put(tag.getTid(), tag);
+		tagsModel = tagList;
+
+		tags = new HashSet<TagBean>();
+
 		allTopics = new ListModelList<ArticleBean>(articleService.select(false));
-		treeview = true;
-		newArticle = new ArticleBean();
-		newArticle.setUserBean(userBean);
-		newArticle.setParent(root);
-		post = EventQueues.lookup("post", EventQueues.APPLICATION, true);
-		post.subscribe(new EventListener<Event>() {
+		articleTreeModel = new ArticleTreeModel(root, articleService);
+
+		eventQueue = EventQueues.lookup("post", EventQueues.APPLICATION, true);
+		eventQueue.subscribe(new EventListener<Event>() {
 			public void onEvent(Event event) {
-				String eventName = event.getName();
-				Map<String, Object> map = (Map<String, Object>) event.getData();
-				TreeNode<ArticleBean> node = (TreeNode<ArticleBean>) map.get("node");
-				ArticleBean newPost = (ArticleBean) map.get("article");
-				if (newPost != null && newPost.equals(newArticle)) { //global
-					newArticle = new ArticleBean();
-					newArticle.setUserBean(userBean);
-					newArticle.setParent(root);
-					schedule = null;
-					currentNode = null;
-					currentArticleTreeModel = null;
-					tags = null; 
-					BindUtils.postNotifyChange(null, null, BoardViewModel.this, "newArticle");
-					BindUtils.postNotifyChange(null, null, BoardViewModel.this, "schedule");
-					BindUtils.postNotifyChange(null, null, BoardViewModel.this, "currentNode");
-				}
-				BindUtils.postNotifyChange(null, null, BoardViewModel.this, "relateArticles"); 
-				BindUtils.postNotifyChange(null, null, BoardViewModel.this, "recentReplies");
-				BindUtils.postNotifyChange(null, null, BoardViewModel.this, "recentTopics");
-
-				if (eventName.equals("onEdit")) {
-					node.setData(articleService.select(newPost.getAid()));
-				} else if (eventName.equals("onDelete")) {
-					TreeNode<ArticleBean> parent = node.getParent();
-					parent.remove(node); //
-					parent.setData(articleService.select(newPost.getParent().getAid()));
-				} else {
-					ArticleTreeNode newNode = new ArticleTreeNode(articleService.select(newPost.getAid()));
-					node.setData(articleService.select(newPost.getParent().getAid()));
-					node.insert(newNode,0);
-				}
-				
-				BindUtils.postNotifyChange(null, null, BoardViewModel.this, "articlesModel");
-
-				if (newPost.getParent().getAid().equals(0)) {
-					if (eventName.equals("onEdit"))
-						allTopics.notifyChange(newPost);
-					else if (eventName.equals("onDelete"))
-						allTopics.remove(newPost);
-					else
-						allTopics.add(0, newPost);
-				}
 
 			}
 		});
 		scheduler = Executors.newScheduledThreadPool(1);
-	}
-
-	@Command
-	@NotifyChange("treeview")
-	public void check(@BindingParam("item") String item) {
-		if ("tree".equals(item))
-			treeview = true;
-		else
-			treeview = false;
-	}
-
-	@Command
-	@NotifyChange("currentNode")
-	public void close() {
-		currentNode = null;
-	}
-
-	@Command
-	@NotifyChange({ "currentArticleTreeModel", "currentNode" }) //
-	public void doSelect(@BindingParam("index") int index) {
-		currentNode = articleTreeNode.getChildAt(index);
-		currentArticleTreeModel = new DefaultTreeModel<ArticleBean>((ArticleTreeNode) currentNode.clone());
-	}
-
-	@Command
-	@NotifyChange("newArticle")
-	public void edit(@BindingParam("node") TreeNode<ArticleBean> node) {
-		ArticleBean article = node.getData();
-		if (article.getUserBean().getUid().equals(userBean.getUid())) {
-			newArticle = article;
-			targetNode = node;
-		}
-	}
-
-	@Command
-	@NotifyChange("newArticle")
-	public void reply(@BindingParam("node") TreeNode<ArticleBean> node) {
-		reset();
-		newArticle.setParent(node.getData());
-		targetNode = node;
-	}
-
-	@Command
-	@NotifyChange({ "currentNode", "currentArticleTreeModel" })
-	public void delete(@BindingParam("node") TreeNode<ArticleBean> node) {
-		articleService.delete(node.getData().getAid());
-		Map<String, Object> map = new HashMap<String, Object>(2);
-		map.put("node", node);
-		map.put("article", node.getData());
-		post.publish(new Event("onDelete", null, map));
-		currentNode = null;
-		currentArticleTreeModel = null;
-	}
-
-	@Command
-	@NotifyChange("newArticle")
-	public void reset() {
-		targetNode = articleTreeNode;
-		newArticle = new ArticleBean();
-		newArticle.setUserBean(userBean);
-		newArticle.setParent(root);
 	}
 
 	@Command
@@ -265,44 +182,93 @@ public class BoardViewModel {
 		if (schedule == null) {
 			schedule = scheduler.schedule(new Runnable() {
 				public void run() {
-					Map<String, Object> map = new HashMap<String, Object>(2);
-					map.put("node", targetNode);
 					if (newArticle.getAid() != null) {
-						articleService.update(newArticle, tags);	
-						map.put("article", newArticle);
-						post.publish(new Event("onEdit", null, map));
+						articleService.update(newArticle, tags);
 					} else {
 						articleService.insert(newArticle, tags);
-						map.put("article", newArticle);
-						post.publish(new Event("onPost", null, map));
+						eventQueue.publish(new Event("onPost", null, newArticle));
 					}
-			//		BindUtils.postGlobalCommand(null, null, cmdName, args);
+					BindUtils.postGlobalCommand(null, null, "update", null);
 				}
 			}, 1, TimeUnit.SECONDS);
-		} else {
+		}
+	}
+
+	@Command
+	@NotifyChange("schedule")
+	public void cancel() {
+		if (schedule != null) {
 			schedule.cancel(true);
 			schedule = null;
 		}
 	}
 
-	private ArticleTreeNode constructTreeNode(ArticleBean root) {
-		ArticleTreeNode rootNode = new ArticleTreeNode(root);
-		LinkedList<ArticleTreeNode> queue = new LinkedList<ArticleTreeNode>();
-		queue.add(rootNode);
-		while (!queue.isEmpty()) {
-			ArticleTreeNode node = queue.remove();
-			for (ArticleBean bean : articleService.selectReplies(node.getData().getAid())) { //
-				StringBuilder tags = new StringBuilder();
-				for (TagDetailBean tag : tagDetailService.selectByAid(bean.getAid())) {
-					tags.append(tagService.select(tag.getTid())).append(" ");
-				}
-				bean.setTags(tags.toString());
-				ArticleTreeNode child = new ArticleTreeNode(bean);
-				node.add(child);
-				queue.add(child);
-			}
+	@Command
+	@NotifyChange("newArticle")
+	public void newPost() {
+		newArticle = new ArticleBean();
+		newArticle.setRef(0);
+		newArticle.setUid(currentUser.getUid());
+		tags = new HashSet<TagBean>();
+	}
+
+	@Command
+	@NotifyChange()
+	public void doListSelect() {
+
+	}
+
+	@Command
+	@NotifyChange({ "currentArticle", "newArticle" })
+	public void doTreeSelect() {
+		if (currentArticle.getUser() == null) {
+			Integer aid = currentArticle.getAid();
+
+			currentArticle.setUser(userService.selectByUid(currentArticle.getUid()));
+
+			StringBuilder sb = new StringBuilder();
+			for (TagDetailBean bean : tagDetailService.selectByAid(aid))
+				sb.append(tagMap.get(bean.getTid())).append(" ");
+			currentArticle.setTags(sb.toString());
+
+			currentArticle.setReplies(articleService.selectReplies(aid));
+
+			currentArticle.setParent(articleService.select(currentArticle.getRef()));
 		}
-		return rootNode;
+		newArticle = null;
+	}
+
+	@Command
+	@NotifyChange("currentArticle")
+	public void close() {
+		currentArticle = null;
+	}
+
+	@Command
+	@NotifyChange({ "newArticle", "tags" })
+	public void edit(@BindingParam("article") ArticleBean article) {
+		newArticle = article;
+		tags = new HashSet<TagBean>();
+		for (TagDetailBean tag : tagDetailService.selectByAid(article.getAid()))
+			tags.add(tagMap.get(tag.getTid()));
+
+	}
+
+	@Command
+	@NotifyChange("currentArticle")
+	public void delete(@BindingParam("article") ArticleBean article) {
+		articleService.delete(article.getAid());
+		currentArticle = null;
+	}
+
+	@Command
+	@NotifyChange({ "newArticle", "tags" })
+	public void reply(@BindingParam("article") ArticleBean article) {
+		newArticle = new ArticleBean();
+		newArticle.setUid(currentUser.getUid());
+		newArticle.setRef(article.getAid());
+		newArticle.setParent(article);
+		tags = new HashSet<TagBean>();
 	}
 
 }

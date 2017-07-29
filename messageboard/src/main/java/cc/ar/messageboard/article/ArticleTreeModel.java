@@ -53,9 +53,5 @@ public class ArticleTreeModel extends AbstractTreeModel<ArticleBean> {
 	public ArticleBean getRoot() {
 		return root;
 	}
-
-	public void remove(ArticleBean node) {
-		map.remove(node);
-	}
 	
 }

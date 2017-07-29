@@ -72,4 +72,13 @@ public class ArticleDAOHibernate implements ArticleDAO {
 		return null;
 	}
 
+	public List<ArticleBean> selectRecent(boolean isReply) {
+		String str = null;
+		if (isReply)
+			str = "from ArticleBean where ref is not null and ref != 0 and visible = 1 order by date desc";
+		else
+			str = "from ArticleBean where ref = 0 and visible = 1 order by date desc";
+		return getSession().createQuery(str, ArticleBean.class).setMaxResults(10).list();
+	}
+
 }
