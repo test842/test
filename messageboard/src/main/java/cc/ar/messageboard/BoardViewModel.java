@@ -80,6 +80,8 @@ public class BoardViewModel {
 	private HashMap<Integer, TagBean> tagMap;
 
 	private Set<TagBean> tags;
+	
+	private HashMap<Integer, ArticleBean> articlesCache;
 
 	public void setView(int view) {
 		this.view = view;
@@ -209,32 +211,35 @@ public class BoardViewModel {
 		newArticle = new ArticleBean();
 		newArticle.setRef(0);
 		newArticle.setUid(currentUser.getUid());
-		tags = new HashSet<TagBean>();
+		tags.clear();
 	}
 
 	@Command
-	@NotifyChange()
+	@NotifyChange({ "currentArticle", "newArticle" })
 	public void doListSelect() {
-
+		doTreeSelect();
 	}
 
 	@Command
 	@NotifyChange({ "currentArticle", "newArticle" })
 	public void doTreeSelect() {
-		if (currentArticle.getUser() == null) {
-			Integer aid = currentArticle.getAid();
-
-			currentArticle.setUser(userService.selectByUid(currentArticle.getUid()));
+		Integer aid = currentArticle.getAid();
+		ArticleBean current = articlesCache.get(aid);
+		if (current == null) {
+			current = currentArticle;
+			current.setUser(userService.selectByUid(current.getUid()));
 
 			StringBuilder sb = new StringBuilder();
 			for (TagDetailBean bean : tagDetailService.selectByAid(aid))
 				sb.append(tagMap.get(bean.getTid())).append(" ");
-			currentArticle.setTags(sb.toString());
+			current.setTags(sb.toString());
 
-			currentArticle.setReplies(articleService.selectReplies(aid));
+			current.setReplies(articleService.selectReplies(aid));
 
-			currentArticle.setParent(articleService.select(currentArticle.getRef()));
+			current.setParent(articleService.select(current.getRef()));
+			articlesCache.put(aid, current);
 		}
+		currentArticle = current;
 		newArticle = null;
 	}
 
@@ -248,7 +253,7 @@ public class BoardViewModel {
 	@NotifyChange({ "newArticle", "tags" })
 	public void edit(@BindingParam("article") ArticleBean article) {
 		newArticle = article;
-		tags = new HashSet<TagBean>();
+		tags.clear();
 		for (TagDetailBean tag : tagDetailService.selectByAid(article.getAid()))
 			tags.add(tagMap.get(tag.getTid()));
 
@@ -268,7 +273,7 @@ public class BoardViewModel {
 		newArticle.setUid(currentUser.getUid());
 		newArticle.setRef(article.getAid());
 		newArticle.setParent(article);
-		tags = new HashSet<TagBean>();
+		tags.clear();
 	}
 
 }

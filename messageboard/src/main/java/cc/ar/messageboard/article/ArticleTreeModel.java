@@ -15,7 +15,7 @@ public class ArticleTreeModel extends AbstractTreeModel<ArticleBean> {
 	
 	private ArticleBean root;
 	
-	private Map<ArticleBean,ArrayList<ArticleBean>> map = new HashMap<ArticleBean,ArrayList<ArticleBean>>();
+	private Map<Integer, ArrayList<ArticleBean>> map = new HashMap<Integer, ArrayList<ArticleBean>>();
 	
 	public ArticleTreeModel(ArticleBean root) {
 		super(root);
@@ -33,19 +33,21 @@ public class ArticleTreeModel extends AbstractTreeModel<ArticleBean> {
 	}
 
 	public ArticleBean getChild(ArticleBean parent, int index) {
-		ArrayList<ArticleBean> children = map.get(parent);
+		Integer aid = parent.getAid();
+		ArrayList<ArticleBean> children = map.get(aid);
 		if (children == null) {
-			children = new ArrayList<ArticleBean>(articleService.selectReplies(parent.getAid()));
-			map.put(parent, children);
+			children = new ArrayList<ArticleBean>(articleService.selectReplies(aid));
+			map.put(aid, children);
 		}
 		return children.get(index);
 	}
 
 	public int getChildCount(ArticleBean parent) {
-		ArrayList<ArticleBean> children = map.get(parent);
+		Integer aid = parent.getAid();
+		ArrayList<ArticleBean> children = map.get(aid);
 		if (children == null) {
-			children = new ArrayList<ArticleBean>(articleService.selectReplies(parent.getAid()));
-			map.put(parent, children);
+			children = new ArrayList<ArticleBean>(articleService.selectReplies(aid));
+			map.put(aid, children);
 		}
 		return children.size();
 	}

@@ -5,12 +5,14 @@
 		<column />
 	</columns>
 	<rows>
-		<row visible="@load((fx.ref != 0))">
-			<cell sclass="row-title">${labels.replyTo} :</cell>
-			<cell>
-				<label value="@load(fx.parent.title)" />
-			</cell>
-		</row>
+		<if test="@load((fx.ref != 0))">
+			<row>
+				<cell sclass="row-title">${labels.replyTo} :</cell>
+				<cell>
+					<label value="@load(fx.parent.title)" />
+				</cell>
+			</row>
+		</if>
 		<row>
 			<cell sclass="row-title">${labels.title} :</cell>
 			<cell>
@@ -20,10 +22,9 @@
 		<row>
 			<cell sclass="row-title">${labels.tags} :</cell>
 			<cell>
-				<chosenbox model="@load(vm.tagsModel)" selectedObjects="@bind(vm.tags)">
-					<template name="model">
-						${each.tagname}
-					</template>
+				<chosenbox model="@load(vm.tagsModel)"
+					selectedObjects="@bind(vm.tags)">
+					<template name="model">${each.tagname}</template>
 				</chosenbox>
 			</cell>
 		</row>
