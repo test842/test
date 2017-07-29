@@ -1,0 +1,17 @@
+<grid hflex="1" model="@load(model)" height="160px">
+	<auxhead>
+		<auxheader colspan="3" label="@load(header)" />
+	</auxhead>
+	<columns>
+		<column label="${labels.title}" hflex="5" />
+		<column label="${labels.author}" hflex="1" />
+		<column label="${labels.date}" hflex="3" />
+	</columns>
+	<template name="model">
+		<row>
+			<label value="@load(each.title)" />
+			<label value="@load(each.userBean.name)" />
+			<label value="@load(each.date)" />
+		</row>
+	</template>
+</grid>

@@ -1,0 +1,47 @@
+<grid>
+	<columns>
+		<column align="right" hflex="min" />
+		<column />
+	</columns>
+	<rows>
+		<row>
+			<cell sclass="row-title">Title :</cell>
+			<cell>
+				<label value="@load(article.title)" />
+			</cell>
+		</row>
+		<row>
+			<cell sclass="row-title">Author :</cell>
+			<cell>
+				<label value="@load(article.userBean.name)" />
+			</cell>
+		</row>
+		<row>
+			<cell sclass="row-title">Date :</cell>
+			<cell>
+				<label value="@load(article.date)" />
+			</cell>
+		</row>
+		<row>
+			<cell sclass="row-title">Tags :</cell>
+			<cell>
+				<label value="@load(article.allTags)" />
+			</cell>
+		</row>
+		<row>
+			<cell sclass="row-title">Content :</cell>
+			<cell>
+				<html content="@load(article.content)" />
+			</cell>
+		</row>
+		<row>
+			<cell />
+			<cell>
+				<button
+					visible="@load((empty article.replies) and (user.uid eq article.userBean.uid))"
+					label="edit" onClick="@command('edit')" />
+				<button label="reply" onClick="@command('reply')" />
+			</cell>
+		</row>
+	</rows>
+</grid>

@@ -1,0 +1,28 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk>
+	<window apply="org.zkoss.bind.BindComposer"
+		viewModel="@id('vm') @init('cc.ar.messageboard.LoginViewModel')"
+		title="${labels.login}" border="normal" hflex="min">
+		<vbox hflex="min" align="center">
+			<grid hflex="min">
+				<columns>
+					<column hflex="min" align="right" />
+					<column />
+				</columns>
+				<rows>
+					<row>
+						${labels.userid} :
+						<intbox value="@save(vm.userBean.uid)" width="200px" constraint="no empty"/>
+					</row>
+					<row>
+						${labels.password} :
+						<textbox value="@save(vm.userBean.password)" type="password"
+							constraint="no empty" width="200px" />
+					</row>
+				</rows>
+			</grid>
+			<label sclass="warn" value="@load(vm.message)" />
+			<button onClick="@command('login')" label="${labels.login}" />
+		</vbox>
+	</window>
+</zk>
