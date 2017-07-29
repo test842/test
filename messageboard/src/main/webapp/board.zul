@@ -8,55 +8,23 @@
 			<north height="160px"
 				visible="@load(empty vm.currentNode)">
 				<hlayout>
-					<template name="top" src="/top.zul"/>
-					<apply template="top" header="@ref(labels.recentTopics)" model="@ref(vm.recentTopics)"/>
-					<grid hflex="1" model="@load(vm.recentReplies)"
-						height="160px">
-						<auxhead>
-							<auxheader colspan="3"
-								label="${labels.recentReplies}" />
-						</auxhead>
-						<columns>
-							<column label="${labels.title}" hflex="5" />
-							<column label="${labels.author}" hflex="1" />
-							<column label="${labels.date}" hflex="3" />
-						</columns>
-						<template name="model">
-							<row>
-								<label value="@load(each.title)" />
-								<label
-									value="@load(each.userBean.name)" />
-								<label value="@load(each.date)" />
-							</row>
-						</template>
-					</grid>
-					<grid hflex="1" model="@load(vm.relateArticles)"
-						height="160px">
-						<auxhead>
-							<auxheader colspan="3"
-								label="${labels.relateArticles}" />
-						</auxhead>
-						<columns>
-							<column label="${labels.title}" hflex="5" />
-							<column label="${labels.author}" hflex="1" />
-							<column label="${labels.date}" hflex="3" />
-						</columns>
-						<template name="model">
-							<row>
-								<label value="@load(each.title)" />
-								<label
-									value="@load(each.userBean.name)" />
-								<label value="@load(each.date)" />
-							</row>
-						</template>
-					</grid>
+					<template name="top" src="/top.zul" />
+					<apply template="top"
+						header="@ref(labels.recentTopics)" model="@ref(vm.recentTopics)" />
+					<apply template="top"
+						header="@ref(labels.recentReplies)"
+						model="@ref(vm.recentReplies)" />
+					<apply template="top"
+						header="@ref(labels.relateArticles)"
+						model="@ref(vm.relateArticles)" />
 				</hlayout>
 			</north>
 			<center>
 				<window>
 					<radiogroup
 						onCheck="@command('check', item=self.selectedItem.value)">
-						<radio label="${labels.tree}" value="tree" selected="true" />
+						<radio label="${labels.tree}" value="tree"
+							selected="true" />
 						<radio label="${labels.list}" value="list" />
 					</radiogroup>
 					<tree model="@load(vm.articlesModel)" height="250px"
@@ -69,17 +37,23 @@
 						<template name="model">
 							<treeitem>
 								<treerow>
-									<treecell label="@load(each.data.title)" />
-									<treecell label="@load(each.data.date)" />
+									<treecell
+										label="@load(each.data.title)" />
+									<treecell
+										label="@load(each.data.date)" />
 								</treerow>
 							</treeitem>
 						</template>
 					</tree>
 					<listbox model="@load(vm.allTopics)" hflex="1"
-						height="250px" onSelect="@command('doSelect', index = self.selectedIndex)" visible="@load(!vm.treeview)">
+						height="250px"
+						onSelect="@command('doSelect', index = self.selectedIndex)"
+						visible="@load(!vm.treeview)">
 						<listhead>
-							<listheader label="${labels.title}" hflex="1" />
-							<listheader label="${labels.date}" hflex="1" />
+							<listheader label="${labels.title}"
+								hflex="1" />
+							<listheader label="${labels.date}"
+								hflex="1" />
 						</listhead>
 						<template name="model">
 							<listitem>
@@ -90,86 +64,24 @@
 					</listbox>
 				</window>
 			</center>
-			<east visible="@load(not empty vm.currentNode)"
-				size="70%" style="overflow: auto">
+			<east visible="@load(not empty vm.currentNode)" size="70%"
+				style="overflow: auto">
 				<vlayout>
-					<grid>
-						<auxhead>
-							<auxheader colspan="2"
-								label="${labels.topic}" />
-						</auxhead>
-						<columns>
-							<column align="right" hflex="min" />
-							<column />
-						</columns>
-						<rows>
-							<row>
-								<cell sclass="row-title">${labels.title} :</cell>
-								<cell>
-									<label
-										value="@load(vm.currentNode.data.title)" />
-								</cell>
-							</row>
-							<row>
-								<cell sclass="row-title">${labels.author} :</cell>
-								<cell>
-									<label
-										value="@load(vm.currentNode.data.userBean.name)" />
-								</cell>
-							</row>
-							<row>
-								<cell sclass="row-title">${labels.date} :</cell>
-								<cell>
-									<label
-										value="@load(vm.currentNode.data.date)" />
-								</cell>
-							</row>
-							<row>
-								<cell sclass="row-title">${labels.tags} :</cell>
-								<cell>
-									<label
-										value="@load(vm.currentNode.data.tags)" />
-								</cell>
-							</row>
-							<row>
-								<cell sclass="row-title">
-									${labels.content} :
-								</cell>
-								<cell>
-									<html
-										content="@load(vm.currentNode.data.content)" />
-								</cell>
-							</row>
-							<row>
-								<cell />
-								<cell>
-									<button label="${labels.reply}"
-										onClick="@command('reply', node = vm.currentNode)" />
-									<button
-										visible="@load((empty vm.currentNode.data.replies) and (vm.user.uid eq vm.currentNode.data.userBean.uid))"
-										label="${labels.edit}"
-										onClick="@command('edit', node = vm.currentNode)" />
-									<button
-										visible="@load(vm.user.uid eq vm.currentNode.data.userBean.uid)"
-										label="${labels.delete}"
-										onClick="@command('delete', node = vm.currentNode)" />
-									<button
-										label="${labels.close}"
-										onClick="@command('close')"/>
-								</cell>
-							</row>
-						</rows>
-					</grid>
+					<template name="artilce" src="/article.zul" />
+					<apply template="article"
+						node="@ref(vm.currentNode)" user="@ref(vm.user)" />
 					<tree model="@load(vm.currentArticleTreeModel)"
-						rows="2" nonselectableTags="*" visible="@load(not empty vm.currentNode.data.replies and !vm.treeview)">
+						rows="2" nonselectableTags="*"
+						visible="@load(not empty vm.currentNode.data.replies and !vm.treeview)">
 						<treecols>
-							<treecol label="reply"/>
+							<treecol label="reply" />
 						</treecols>
 						<template name="model">
 							<treeitem>
 								<treerow>
 									<treecell>
-										<grid width="400px" style="display: inline-block">
+										<grid width="400px"
+											style="display: inline-block">
 											<columns>
 												<column align="right"
 													hflex="min" />
@@ -179,7 +91,8 @@
 												<row>
 													<cell
 														sclass="row-title">
-														${labels.title} :
+														${labels.title}
+														:
 													</cell>
 													<cell>
 														<label
@@ -189,7 +102,8 @@
 												<row>
 													<cell
 														sclass="row-title">
-														${labels.author} :
+														${labels.author}
+														:
 													</cell>
 													<cell>
 														<label
@@ -219,7 +133,8 @@
 												<row>
 													<cell
 														sclass="row-title">
-														${labels.content} :
+														${labels.content}
+														:
 													</cell>
 													<cell>
 														<html
@@ -234,7 +149,8 @@
 															onClick="@command('reply', node = each)" />
 														<button
 															visible="@load((empty each.data.replies) and (vm.user.uid eq each.data.userBean.uid))"
-															label="${labels.edit}" onClick="@command('edit', node = each)" />
+															label="${labels.edit}"
+															onClick="@command('edit', node = each)" />
 														<button
 															visible="@load(vm.user.uid eq each.data.userBean.uid)"
 															label="${labels.delete}"
@@ -260,26 +176,34 @@
 					<rows>
 						<row
 							visible="@load(not empty fx.parent.parent)">
-							<cell sclass="row-title">${labels.replyTo} :</cell>
+							<cell sclass="row-title">
+								${labels.replyTo} :
+							</cell>
 							<cell>
 								<label value="@load(fx.parent.title)" />
 							</cell>
 						</row>
 						<row>
-							<cell sclass="row-title">${labels.title} :</cell>
+							<cell sclass="row-title">
+								${labels.title} :
+							</cell>
 							<cell>
 								<textbox value="@bind(fx.title)" />
 							</cell>
 						</row>
 						<row>
-							<cell sclass="row-title">${labels.tags} :</cell>
+							<cell sclass="row-title">
+								${labels.tags} :
+							</cell>
 							<cell>
 								<textbox
 									value="@load(fx.tags) @save(vm.tags, before='post')" />
 							</cell>
 						</row>
 						<row>
-							<cell sclass="row-title">${labels.content} :</cell>
+							<cell sclass="row-title">
+								${labels.content} :
+							</cell>
 							<cell>
 								<ckeditor value="@bind(fx.content)" />
 							</cell>

@@ -87,6 +87,10 @@ public class BoardViewModel {
 	public void setTags(String tags) {
 		this.tags = tags;
 	}
+	
+	public String getTags() {
+		return tags;
+	}
 
 	public TreeModel<TreeNode<ArticleBean>> getCurrentArticleTreeModel() {
 		return currentArticleTreeModel;
@@ -158,7 +162,6 @@ public class BoardViewModel {
 					currentNode = null;
 					currentArticleTreeModel = null;
 					tags = null; 
-					BindUtils.postNotifyChange(null, null, BoardViewModel.this, "tags");
 					BindUtils.postNotifyChange(null, null, BoardViewModel.this, "newArticle");
 					BindUtils.postNotifyChange(null, null, BoardViewModel.this, "schedule");
 					BindUtils.postNotifyChange(null, null, BoardViewModel.this, "currentNode");
@@ -179,8 +182,6 @@ public class BoardViewModel {
 					node.insert(newNode,0);
 				}
 				
-//				articleTreeNode = constructTreeNode(root);
-//				articleTreeModel = new DefaultTreeModel<ArticleBean>(articleTreeNode);
 				BindUtils.postNotifyChange(null, null, BoardViewModel.this, "articlesModel");
 
 				if (newPost.getParent().getAid().equals(0)) {

@@ -3,22 +3,13 @@ package cc.ar.messageboard.article;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-
-import org.hibernate.annotations.Where;
-
-import cc.ar.messageboard.user.UserBean;
 
 @Entity
 @Table(name = "ARTICLE")
@@ -30,14 +21,9 @@ public class ArticleBean {
 	private String title;
 	private String content;
 	
-	@ManyToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name = "ref")
-	private ArticleBean parent;
+	private Integer ref;
 	
-	
-	@ManyToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name = "uid")
-	private UserBean userBean;
+	private Integer uid;
 	
 	@Column(insertable = false)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -46,17 +32,10 @@ public class ArticleBean {
 	@Column(insertable = false)
 	private Boolean visible;
 	
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "parent")
-	@OrderBy("date desc")
-	@Where(clause = "visible = 1")
+	@Transient
 	private List<ArticleBean> replies; 
 	
-	public ArticleBean getParent() {
-		return parent;
-	}
-	public void setParent(ArticleBean parent) {
-		this.parent = parent;
-	}
+	
 	public List<ArticleBean> getReplies() {
 		return replies;
 	}
@@ -64,11 +43,19 @@ public class ArticleBean {
 		this.replies = replies;
 	}
 	
-	public UserBean getUserBean() {
-		return userBean;
+	
+	
+	public Integer getRef() {
+		return ref;
 	}
-	public void setUserBean(UserBean userBean) {
-		this.userBean = userBean;
+	public void setRef(Integer ref) {
+		this.ref = ref;
+	}
+	public Integer getUid() {
+		return uid;
+	}
+	public void setUid(Integer uid) {
+		this.uid = uid;
 	}
 	public Boolean getVisible() {
 		return visible;

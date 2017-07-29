@@ -1,46 +1,57 @@
 <grid>
+	<auxhead>
+		<auxheader colspan="2" label="${labels.topic}" />
+	</auxhead>
 	<columns>
 		<column align="right" hflex="min" />
 		<column />
 	</columns>
 	<rows>
 		<row>
-			<cell sclass="row-title">Title :</cell>
+			<cell sclass="row-title">${labels.title} :</cell>
 			<cell>
-				<label value="@load(article.title)" />
+				<label value="@load(node.data.title)" />
 			</cell>
 		</row>
 		<row>
-			<cell sclass="row-title">Author :</cell>
+			<cell sclass="row-title">${labels.author} :</cell>
 			<cell>
-				<label value="@load(article.userBean.name)" />
+				<label value="@load(node.data.userBean.name)" />
 			</cell>
 		</row>
 		<row>
-			<cell sclass="row-title">Date :</cell>
+			<cell sclass="row-title">${labels.date} :</cell>
 			<cell>
-				<label value="@load(article.date)" />
+				<label value="@load(node.data.date)" />
 			</cell>
 		</row>
 		<row>
-			<cell sclass="row-title">Tags :</cell>
+			<cell sclass="row-title">${labels.tags} :</cell>
 			<cell>
-				<label value="@load(article.allTags)" />
+				<label value="@load(node.data.tags)" />
 			</cell>
 		</row>
 		<row>
-			<cell sclass="row-title">Content :</cell>
+			<cell sclass="row-title">${labels.content} :</cell>
 			<cell>
-				<html content="@load(article.content)" />
+				<html content="@load(node.data.content)" />
 			</cell>
 		</row>
 		<row>
 			<cell />
 			<cell>
+				<button label="${labels.reply}"
+					onClick="@command('reply', node = node)" />
 				<button
-					visible="@load((empty article.replies) and (user.uid eq article.userBean.uid))"
-					label="edit" onClick="@command('edit')" />
-				<button label="reply" onClick="@command('reply')" />
+					visible="@load((empty node.data.replies) and (user.uid eq node.data.userBean.uid))"
+					label="${labels.edit}"
+					onClick="@command('edit', node = node)" />
+				<button
+					visible="@load(user.uid eq node.data.userBean.uid)"
+					label="${labels.delete}"
+					onClick="@command('delete', node = node)" />
+				<button label="${labels.close}"
+					onClick="@command('close')" />
 			</cell>
 		</row>
 	</rows>
