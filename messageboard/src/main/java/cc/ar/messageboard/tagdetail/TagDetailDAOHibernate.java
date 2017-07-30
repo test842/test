@@ -35,7 +35,8 @@ public class TagDetailDAOHibernate implements TagDetailDAO {
 
 	public boolean delete(Integer aid,Integer tid) {
 		if (aid != null && tid != null) {
-			return getSession().createQuery("delete from TagDetailBean where aid = ? and tid = ?", TagDetailBean.class).setParameter(0, aid).setParameter(1, tid).executeUpdate() == 1;
+			getSession().delete(select(aid, tid));
+			return true;
 		}
 		return false;
 	}

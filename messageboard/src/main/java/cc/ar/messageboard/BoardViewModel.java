@@ -1,8 +1,10 @@
 package cc.ar.messageboard;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -12,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import org.zkoss.bind.BindUtils;
 import org.zkoss.bind.annotation.BindingParam;
 import org.zkoss.bind.annotation.Command;
+import org.zkoss.bind.annotation.GlobalCommand;
 import org.zkoss.bind.annotation.Init;
 import org.zkoss.bind.annotation.NotifyChange;
 import org.zkoss.zk.ui.Sessions;
@@ -152,6 +155,7 @@ public class BoardViewModel {
 		currentUser = (UserBean) Sessions.getCurrent().getAttribute("currentUser");
 		root = articleService.selectByUid(0).get(0);
 		view = 0;
+		articlesCache = new HashMap<Integer, ArticleBean>();
 
 		recentReplies = articleService.selectRecent(true);
 		recentTopics = articleService.selectRecent(false);
@@ -172,7 +176,9 @@ public class BoardViewModel {
 		eventQueue = EventQueues.lookup("post", EventQueues.APPLICATION, true);
 		eventQueue.subscribe(new EventListener<Event>() {
 			public void onEvent(Event event) {
-
+				Map<String, Object> map = new HashMap<String, Object>(1);
+				map.put("aid", event.getData());
+				BindUtils.postGlobalCommand(null, null, "update", map);
 			}
 		});
 		scheduler = Executors.newScheduledThreadPool(1);
@@ -188,12 +194,45 @@ public class BoardViewModel {
 						articleService.update(newArticle, tags);
 					} else {
 						articleService.insert(newArticle, tags);
-						eventQueue.publish(new Event("onPost", null, newArticle));
+						eventQueue.publish(new Event("onPost", null, newArticle.getAid()));
 					}
-					BindUtils.postGlobalCommand(null, null, "update", null);
+//					BindUtils.postGlobalCommand(null, null, "clear", null);
 				}
-			}, 1, TimeUnit.SECONDS);
+			}, 3, TimeUnit.SECONDS);
 		}
+	}
+	
+	@GlobalCommand
+	@NotifyChange({ "articleTreeModel" })
+	public void update(@BindingParam("aid") Integer aid ) {
+		ArticleBean newPost = articleService.select(aid);
+		if (newPost.getRef().equals(0)) {
+			allTopics.add(0, newPost);
+			updateList(recentTopics, newPost);
+			BindUtils.postNotifyChange(null, null, this, "recentTopics");
+		} else {
+			updateList(recentReplies, newPost);
+			BindUtils.postNotifyChange(null, null, this, "recentReplies");
+		}
+		if (newPost.getUid().equals(currentUser.getUid())) {
+			updateList(relateArticles, newPost);
+			BindUtils.postNotifyChange(null, null, this, "relateArticles");
+		}
+		articleTreeModel = new ArticleTreeModel(root, articleService);
+	}
+	
+	private void updateList(List<ArticleBean> list, ArticleBean bean) {
+		if (!list.isEmpty())
+			list.remove(list.size() - 1);
+		list.add(0, bean);
+	}
+	
+	@GlobalCommand
+	@NotifyChange({ "schedule" , "newArticle" })
+	public void clear() {
+		System.out.println("clear");
+		schedule = null;
+		newArticle = null;
 	}
 
 	@Command
@@ -218,15 +257,44 @@ public class BoardViewModel {
 	@NotifyChange({ "currentArticle", "newArticle" })
 	public void doListSelect() {
 		doTreeSelect();
+		setReplyDetail(currentArticle);
 	}
 
 	@Command
 	@NotifyChange({ "currentArticle", "newArticle" })
 	public void doTreeSelect() {
-		Integer aid = currentArticle.getAid();
+		currentArticle = setArticleDetail(currentArticle);
+		newArticle = null;
+	}
+	
+	@Command
+	@NotifyChange("currentArticle")
+	public void clearCurrentArticle() {
+		currentArticle = null;
+	}
+	
+	@Command
+	public void open(@BindingParam("article") ArticleBean article) {
+		setReplyDetail(article);
+	}
+	
+	private void setReplyDetail(ArticleBean article) {
+		List<ArticleBean> replies = article.getReplies();
+		List<ArticleBean> list = new ArrayList<ArticleBean>();
+		if (replies != null && !replies.isEmpty())
+		for (ArticleBean reply : replies) {
+			list.add(setArticleDetail(reply));
+		}
+		article.setReplies(list);
+	}
+	
+	private ArticleBean setArticleDetail(ArticleBean article) {
+		if (article == null)
+			return article;
+		Integer aid = article.getAid();	
 		ArticleBean current = articlesCache.get(aid);
 		if (current == null) {
-			current = currentArticle;
+			current = article;
 			current.setUser(userService.selectByUid(current.getUid()));
 
 			StringBuilder sb = new StringBuilder();
@@ -239,8 +307,7 @@ public class BoardViewModel {
 			current.setParent(articleService.select(current.getRef()));
 			articlesCache.put(aid, current);
 		}
-		currentArticle = current;
-		newArticle = null;
+		return current;
 	}
 
 	@Command

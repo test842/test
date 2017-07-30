@@ -1,6 +1,6 @@
 <window>
 	<button label="${labels.newArticle}" onClick="@command('newPost')" />
-	<radiogroup selectedIndex="@bind(vm.view)">
+	<radiogroup selectedIndex="@bind(vm.view)" onCheck="@command('clearCurrentArticle')">
 		<radio label="${labels.tree}" selected="true" />
 		<radio label="${labels.list}" />
 	</radiogroup>
@@ -24,7 +24,7 @@
 			</tree>
 		</when>
 		<when test="@load((vm.view == 1))">
-			<listbox model="@load(vm.allTopics)" hflex="1"
+			<listbox model="@load(vm.allTopics)" 
 				height="250px" onSelect="@command('doListSelect')"
 				selectedItem="@bind(vm.currentArticle)">
 				<listhead>

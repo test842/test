@@ -1,7 +1,4 @@
-<grid left="@load(left)px">
-	<auxhead>
-		<auxheader colspan="2" label="${labels.topic}" />
-	</auxhead>
+<grid>
 	<columns>
 		<column align="right" hflex="min" />
 		<column />

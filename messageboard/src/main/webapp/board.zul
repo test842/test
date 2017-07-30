@@ -22,32 +22,19 @@
 			<center>
 				<apply templateURI="/center.zul" />
 			</center>
-			<east visible="@load(not empty vm.currentArticle)" size="70%" autoscroll="true">
+			<east visible="@load(not empty vm.currentArticle)"
+				size="70%" autoscroll="true">
 				<vlayout>
 					<template name="article" src="/article.zul" />
-					<apply template="article" article="@ref(vm.currentArticle)" left="0"/>
+					<template name="reply" src="/reply.zul" />
+					<apply template="article" article="@ref(vm.currentArticle)" />
 					<if test="@load((vm.view == 1) and (not empty vm.currentArticle.replies))">
-						<template name="articleTree">
-							<forEach items="@load(articles)">
-								<choose>
-									<when test="@load(empty each.replies)">
-										<apply template="article" article="@ref(each)" left="@ref(left + 50)"/>
-									</when>
-									<otherwise>
-										<apply template="sub" article="@ref(each)" left="@ref(left + 50)"/>
-									</otherwise>
-								</choose>
-							</forEach>
-						</template>
-						<template name="sub">
-							<apply template="article" article="@ref(each)" left="@ref(left)"/>
-							<apply template="articleTree" articles="@ref(each.replies)" left="@ref(left)"/>
-						</template>
-						<apply template="articleTree" articles="@ref(vm.currentArticle.replies)" left="0"/>
+						<apply template="reply" replies="@ref(vm.currentArticle.replies)" />
 					</if>
 				</vlayout>
 			</east>
-			<south size="50%" autoscroll="true" visible="@load(not empty vm.newArticle)">
+			<south size="50%" autoscroll="true"
+				visible="@load(not empty vm.newArticle)">
 				<apply templateURI="/input.zul" />
 			</south>
 		</borderlayout>

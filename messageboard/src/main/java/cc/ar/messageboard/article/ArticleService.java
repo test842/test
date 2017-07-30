@@ -88,12 +88,13 @@ public class ArticleService {
 			for (TagDetailBean oldTag : tagDetailService.selectByAid(article.getAid()))
 				oldTags.add(oldTag.getTid());
 			
+			if (tags != null)
 			for (TagBean tag : tags) {
 				Integer tid = tag.getTid();
-				if (!oldTags.contains(tid)) {
+				if (!oldTags.contains(tid)) 
 					tagDetailService.insert(aid, tid);
-				}	
-				oldTags.remove(tid);
+				else	
+					oldTags.remove(tid);
 			}
 			for (Integer tid : oldTags) {
 				tagDetailService.delete(aid, tid);

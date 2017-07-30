@@ -1,0 +1,23 @@
+<grid model="@load(replies)">
+	<columns>
+		<column width="30px" />
+		<column />
+	</columns>
+	<template name="model">
+		<row>
+			<choose>
+				<when test="@load(not empty each.replies)">
+					<detail fulfill="onOpen" onOpen="@command('open', article = each)">
+						<apply template="reply" replies="@ref(each.replies)" />
+					</detail>
+				</when>
+				<otherwise>
+					<div />
+				</otherwise>
+			</choose>
+			<div>
+				<apply template="article" article="@ref(each)" />
+			</div>
+		</row>
+	</template>
+</grid>
