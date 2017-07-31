@@ -17,6 +17,9 @@ import org.zkoss.bind.annotation.Command;
 import org.zkoss.bind.annotation.GlobalCommand;
 import org.zkoss.bind.annotation.Init;
 import org.zkoss.bind.annotation.NotifyChange;
+import org.zkoss.zk.ui.Desktop;
+import org.zkoss.zk.ui.DesktopUnavailableException;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -83,7 +86,7 @@ public class BoardViewModel {
 	private HashMap<Integer, TagBean> tagMap;
 
 	private Set<TagBean> tags;
-	
+
 	private HashMap<Integer, ArticleBean> articlesCache;
 
 	public void setView(int view) {
@@ -185,9 +188,10 @@ public class BoardViewModel {
 	}
 
 	@Command
-	@NotifyChange({ "schedule" })
+	@NotifyChange("schedule")
 	public void post() {
 		if (schedule == null) {
+			final Desktop desktop = Executions.getCurrent().getDesktop();
 			schedule = scheduler.schedule(new Runnable() {
 				public void run() {
 					if (newArticle.getAid() != null) {
@@ -196,15 +200,24 @@ public class BoardViewModel {
 						articleService.insert(newArticle, tags);
 						eventQueue.publish(new Event("onPost", null, newArticle.getAid()));
 					}
-//					BindUtils.postGlobalCommand(null, null, "clear", null);
+					try {
+						Executions.activate(desktop);
+						BindUtils.postGlobalCommand(null, null, "clear", null);
+					} catch (DesktopUnavailableException e) {
+						e.printStackTrace();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					} finally {
+						Executions.deactivate(desktop);
+					}
 				}
 			}, 3, TimeUnit.SECONDS);
 		}
 	}
-	
+
 	@GlobalCommand
 	@NotifyChange({ "articleTreeModel" })
-	public void update(@BindingParam("aid") Integer aid ) {
+	public void update(@BindingParam("aid") Integer aid) {
 		ArticleBean newPost = articleService.select(aid);
 		if (newPost.getRef().equals(0)) {
 			allTopics.add(0, newPost);
@@ -220,19 +233,19 @@ public class BoardViewModel {
 		}
 		articleTreeModel = new ArticleTreeModel(root, articleService);
 	}
-	
+
 	private void updateList(List<ArticleBean> list, ArticleBean bean) {
 		if (!list.isEmpty())
 			list.remove(list.size() - 1);
 		list.add(0, bean);
 	}
-	
+
 	@GlobalCommand
-	@NotifyChange({ "schedule" , "newArticle" })
+	@NotifyChange({ "schedule", "newArticle" , "currentArticle" })
 	public void clear() {
-		System.out.println("clear");
 		schedule = null;
 		newArticle = null;
+		currentArticle = null;
 	}
 
 	@Command
@@ -254,6 +267,14 @@ public class BoardViewModel {
 	}
 
 	@Command
+	@NotifyChange("newArticle")
+	public void clearNewArticle() {
+		tags.clear();
+		newArticle = null;
+	}
+	
+
+	@Command
 	@NotifyChange({ "currentArticle", "newArticle" })
 	public void doListSelect() {
 		doTreeSelect();
@@ -266,32 +287,26 @@ public class BoardViewModel {
 		currentArticle = setArticleDetail(currentArticle);
 		newArticle = null;
 	}
-	
-	@Command
-	@NotifyChange("currentArticle")
-	public void clearCurrentArticle() {
-		currentArticle = null;
-	}
-	
+
 	@Command
 	public void open(@BindingParam("article") ArticleBean article) {
 		setReplyDetail(article);
 	}
-	
+
 	private void setReplyDetail(ArticleBean article) {
 		List<ArticleBean> replies = article.getReplies();
 		List<ArticleBean> list = new ArrayList<ArticleBean>();
 		if (replies != null && !replies.isEmpty())
-		for (ArticleBean reply : replies) {
-			list.add(setArticleDetail(reply));
-		}
+			for (ArticleBean reply : replies) {
+				list.add(setArticleDetail(reply));
+			}
 		article.setReplies(list);
 	}
-	
+
 	private ArticleBean setArticleDetail(ArticleBean article) {
 		if (article == null)
-			return article;
-		Integer aid = article.getAid();	
+			return null;
+		Integer aid = article.getAid();
 		ArticleBean current = articlesCache.get(aid);
 		if (current == null) {
 			current = article;

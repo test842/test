@@ -46,6 +46,8 @@
 					<button label="@load(labels.cancel)"
 						onClick="@command('cancel')" />
 				</if>
+				<button label="${labels.close}"
+					onClick="@command('clearNewArticle')" />
 			</cell>
 		</row>
 	</rows>

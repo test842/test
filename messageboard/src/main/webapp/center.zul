@@ -1,6 +1,6 @@
 <window>
 	<button label="${labels.newArticle}" onClick="@command('newPost')" />
-	<radiogroup selectedIndex="@bind(vm.view)" onCheck="@command('clearCurrentArticle')">
+	<radiogroup selectedIndex="@bind(vm.view)" onCheck="@command('close')">
 		<radio label="${labels.tree}" selected="true" />
 		<radio label="${labels.list}" />
 	</radiogroup>
