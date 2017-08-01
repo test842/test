@@ -1,9 +1,13 @@
 <window>
 	<button label="${labels.newArticle}" onClick="@command('newPost')" />
-	<radiogroup selectedIndex="@bind(vm.view)" onCheck="@command('close')">
+	<radiogroup selectedIndex="@bind(vm.view)"
+		onCheck="@command('close')">
 		<radio label="${labels.tree}" selected="true" />
 		<radio label="${labels.list}" />
 	</radiogroup>
+	<window mode="modal" visible="@load(not empty vm.newArticle)">
+		<apply templateURI="/input.zul" />
+	</window>
 	<choose>
 		<when test="@load((vm.view == 0))">
 			<tree model="@load(vm.articleTreeModel)" height="250px"
@@ -24,8 +28,8 @@
 			</tree>
 		</when>
 		<when test="@load((vm.view == 1))">
-			<listbox model="@load(vm.allTopics)" 
-				height="250px" onSelect="@command('doListSelect')"
+			<listbox model="@load(vm.allTopics)" height="250px"
+				onSelect="@command('doListSelect')"
 				selectedItem="@bind(vm.currentArticle)">
 				<listhead>
 					<listheader label="${labels.title}" hflex="1" />

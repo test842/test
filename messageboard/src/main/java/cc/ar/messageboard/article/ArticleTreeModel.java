@@ -22,10 +22,12 @@ public class ArticleTreeModel extends AbstractTreeModel<ArticleBean> {
 		this.root = root;
 	}
 	
-	public ArticleTreeModel(ArticleBean root, ArticleService articleService) {
+	public ArticleTreeModel(ArticleBean root, ArticleService articleService, Map<Integer, ArrayList<ArticleBean>> map) {
 		super(root);
 		this.articleService = articleService;
 		this.root = root;
+		if (map != null)
+			this.map = map;
 	}
 
 	public boolean isLeaf(ArticleBean node) {
@@ -54,6 +56,14 @@ public class ArticleTreeModel extends AbstractTreeModel<ArticleBean> {
 	
 	public ArticleBean getRoot() {
 		return root;
+	}
+	
+	public Map<Integer, ArrayList<ArticleBean>> getMap() {
+		return map;
+	}
+	
+	public void setMap(Map<Integer, ArrayList<ArticleBean>> map) {
+		this.map = map;
 	}
 	
 }

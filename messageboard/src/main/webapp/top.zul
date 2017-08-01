@@ -1,4 +1,4 @@
-<grid hflex="1" model="@load(model)" height="160px">
+<grid hflex="1" model="@load(model)" height="300px">
 	<auxhead>
 		<auxheader colspan="3" label="@load(header)" />
 	</auxhead>

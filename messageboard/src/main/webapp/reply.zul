@@ -8,7 +8,7 @@
 			<choose>
 				<when test="@load(not empty each.replies)">
 					<detail fulfill="onOpen" onOpen="@command('open', article = each)">
-						<apply template="reply" replies="@ref(each.replies)" />
+						<apply template="reply" replies="@load(each.replies)" />
 					</detail>
 				</when>
 				<otherwise>
@@ -16,7 +16,7 @@
 				</otherwise>
 			</choose>
 			<div>
-				<apply template="article" article="@ref(each)" />
+				<apply template="article" article="@load(each)" />
 			</div>
 		</row>
 	</template>

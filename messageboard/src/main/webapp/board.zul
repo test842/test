@@ -5,7 +5,7 @@
 		viewModel="@id('vm') @init('cc.ar.messageboard.BoardViewModel')"
 		hflex="1" vflex="1" contentStyle="overflow:auto">
 		<borderlayout>
-			<north height="160px"
+			<north height="300px"
 				visible="@load(empty vm.currentArticle)">
 				<hlayout>
 					<template name="top" src="/top.zul" />
@@ -27,16 +27,13 @@
 				<vlayout>
 					<template name="article" src="/article.zul" />
 					<template name="reply" src="/reply.zul" />
-					<apply template="article" article="@ref(vm.currentArticle)" />
+					<apply template="article"
+						article="@ref(vm.currentArticle)" />
 					<if test="@load((vm.view == 1) and (not empty vm.currentArticle.replies))">
-						<apply template="reply" replies="@ref(vm.currentArticle.replies)" />
+						<apply template="reply" replies="@load(vm.currentArticle.replies)" />
 					</if>
 				</vlayout>
 			</east>
-			<south size="50%" autoscroll="true"
-				visible="@load(not empty vm.newArticle)">
-				<apply templateURI="/input.zul" />
-			</south>
 		</borderlayout>
 	</window>
 </zk>

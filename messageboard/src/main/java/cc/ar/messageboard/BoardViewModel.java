@@ -11,6 +11,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zkoss.bind.BindUtils;
 import org.zkoss.bind.annotation.BindingParam;
 import org.zkoss.bind.annotation.Command;
@@ -43,6 +45,8 @@ import cc.ar.messageboard.user.UserService;
 @VariableResolver(org.zkoss.zkplus.spring.DelegatingVariableResolver.class)
 public class BoardViewModel {
 
+	private static final Logger logger = LoggerFactory.getLogger(BoardViewModel.class);
+	
 	@WireVariable
 	private TagService tagService;
 
@@ -55,7 +59,7 @@ public class BoardViewModel {
 	@WireVariable
 	private UserService userService;
 
-	private TreeModel<ArticleBean> articleTreeModel;
+	private ArticleTreeModel articleTreeModel;
 
 	private ArticleBean currentArticle;
 
@@ -155,7 +159,10 @@ public class BoardViewModel {
 
 	@Init
 	public void init() {
+		logger.debug("board view model init");
+		
 		currentUser = (UserBean) Sessions.getCurrent().getAttribute("currentUser");
+		logger.debug("current user id : {}", currentUser.getUid());
 		root = articleService.selectByUid(0).get(0);
 		view = 0;
 		articlesCache = new HashMap<Integer, ArticleBean>();
@@ -174,11 +181,12 @@ public class BoardViewModel {
 		tags = new HashSet<TagBean>();
 
 		allTopics = new ListModelList<ArticleBean>(articleService.select(false));
-		articleTreeModel = new ArticleTreeModel(root, articleService);
+		articleTreeModel = new ArticleTreeModel(root, articleService, null);
 
 		eventQueue = EventQueues.lookup("post", EventQueues.APPLICATION, true);
 		eventQueue.subscribe(new EventListener<Event>() {
 			public void onEvent(Event event) {
+				logger.debug("on post event");
 				Map<String, Object> map = new HashMap<String, Object>(1);
 				map.put("aid", event.getData());
 				BindUtils.postGlobalCommand(null, null, "update", map);
@@ -190,22 +198,32 @@ public class BoardViewModel {
 	@Command
 	@NotifyChange("schedule")
 	public void post() {
+		logger.debug("post new article");
 		if (schedule == null) {
+			logger.debug("schedule post");
 			final Desktop desktop = Executions.getCurrent().getDesktop();
 			schedule = scheduler.schedule(new Runnable() {
 				public void run() {
+					logger.debug("do post");
 					if (newArticle.getAid() != null) {
+						logger.debug("edit article, aid = {}", newArticle.getAid());
 						articleService.update(newArticle, tags);
 					} else {
+						logger.debug("insert article");
 						articleService.insert(newArticle, tags);
+						logger.debug("publish post event");
 						eventQueue.publish(new Event("onPost", null, newArticle.getAid()));
 					}
 					try {
+						logger.debug("try to gain access to current desktop");
 						Executions.activate(desktop);
+						logger.debug("clear variables after post");
 						BindUtils.postGlobalCommand(null, null, "clear", null);
 					} catch (DesktopUnavailableException e) {
+						logger.error("Desktop Unavailable Exception", e);
 						e.printStackTrace();
 					} catch (InterruptedException e) {
+						logger.error("Interrupted Exception", e);
 						e.printStackTrace();
 					} finally {
 						Executions.deactivate(desktop);
@@ -218,20 +236,33 @@ public class BoardViewModel {
 	@GlobalCommand
 	@NotifyChange({ "articleTreeModel" })
 	public void update(@BindingParam("aid") Integer aid) {
+		logger.debug("update view for new post, aid = {}", aid);
 		ArticleBean newPost = articleService.select(aid);
 		if (newPost.getRef().equals(0)) {
+			logger.debug("update recent topics and list view");
 			allTopics.add(0, newPost);
 			updateList(recentTopics, newPost);
 			BindUtils.postNotifyChange(null, null, this, "recentTopics");
 		} else {
+			logger.debug("update recent replies");
 			updateList(recentReplies, newPost);
 			BindUtils.postNotifyChange(null, null, this, "recentReplies");
 		}
 		if (newPost.getUid().equals(currentUser.getUid())) {
+			logger.debug("update realte articles");
 			updateList(relateArticles, newPost);
 			BindUtils.postNotifyChange(null, null, this, "relateArticles");
 		}
-		articleTreeModel = new ArticleTreeModel(root, articleService);
+		logger.debug("update tree view");
+		Integer ref = newPost.getRef();
+		Map<Integer, ArrayList<ArticleBean>> map = articleTreeModel.getMap();
+		ArrayList<ArticleBean> list = map.remove(ref);
+		if (list != null) {
+			list.add(0, newPost);
+			map.put(ref, list);
+		}
+		map.put(aid, new ArrayList<ArticleBean>(0));
+		articleTreeModel.setMap(map);
 	}
 
 	private void updateList(List<ArticleBean> list, ArticleBean bean) {
@@ -243,6 +274,9 @@ public class BoardViewModel {
 	@GlobalCommand
 	@NotifyChange({ "schedule", "newArticle" , "currentArticle" })
 	public void clear() {
+		logger.debug("clear after post");
+		articlesCache.remove(newArticle.getAid());
+		articlesCache.remove(newArticle.getRef());
 		schedule = null;
 		newArticle = null;
 		currentArticle = null;
@@ -252,6 +286,7 @@ public class BoardViewModel {
 	@NotifyChange("schedule")
 	public void cancel() {
 		if (schedule != null) {
+			logger.debug("cancel schedule");
 			schedule.cancel(true);
 			schedule = null;
 		}
@@ -260,6 +295,7 @@ public class BoardViewModel {
 	@Command
 	@NotifyChange("newArticle")
 	public void newPost() {
+		logger.debug("create new article");
 		newArticle = new ArticleBean();
 		newArticle.setRef(0);
 		newArticle.setUid(currentUser.getUid());
@@ -269,6 +305,7 @@ public class BoardViewModel {
 	@Command
 	@NotifyChange("newArticle")
 	public void clearNewArticle() {
+		logger.debug("clear new article");
 		tags.clear();
 		newArticle = null;
 	}
@@ -277,6 +314,7 @@ public class BoardViewModel {
 	@Command
 	@NotifyChange({ "currentArticle", "newArticle" })
 	public void doListSelect() {
+		logger.debug("on list select");
 		doTreeSelect();
 		setReplyDetail(currentArticle);
 	}
@@ -294,6 +332,7 @@ public class BoardViewModel {
 	}
 
 	private void setReplyDetail(ArticleBean article) {
+		logger.debug("get details of replies of article aid = {}", article.getAid());
 		List<ArticleBean> replies = article.getReplies();
 		List<ArticleBean> list = new ArrayList<ArticleBean>();
 		if (replies != null && !replies.isEmpty())
@@ -307,6 +346,7 @@ public class BoardViewModel {
 		if (article == null)
 			return null;
 		Integer aid = article.getAid();
+		logger.debug("get details of article, aid = {}", aid);
 		ArticleBean current = articlesCache.get(aid);
 		if (current == null) {
 			current = article;
@@ -328,17 +368,18 @@ public class BoardViewModel {
 	@Command
 	@NotifyChange("currentArticle")
 	public void close() {
+		logger.debug("clear current article");
 		currentArticle = null;
 	}
 
 	@Command
 	@NotifyChange({ "newArticle", "tags" })
 	public void edit(@BindingParam("article") ArticleBean article) {
+		logger.debug("edit article,aid = {}", article.getAid());
 		newArticle = article;
 		tags.clear();
 		for (TagDetailBean tag : tagDetailService.selectByAid(article.getAid()))
 			tags.add(tagMap.get(tag.getTid()));
-
 	}
 
 	@Command
@@ -351,6 +392,7 @@ public class BoardViewModel {
 	@Command
 	@NotifyChange({ "newArticle", "tags" })
 	public void reply(@BindingParam("article") ArticleBean article) {
+		logger.debug("reply to article aid = {}", article.getAid());
 		newArticle = new ArticleBean();
 		newArticle.setUid(currentUser.getUid());
 		newArticle.setRef(article.getAid());

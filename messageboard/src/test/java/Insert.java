@@ -13,8 +13,8 @@ public class Insert {
 			String insertMember = "insert into article(title,content,ref,uid) values (?,?,?,?)";
 			PreparedStatement pstmt = conn.prepareStatement(insertMember);
 			for (int i = 1; i <= 20; i++) {
-				pstmt.setString(1, String.valueOf(i));
-				pstmt.setString(2, String.valueOf(i));
+				pstmt.setString(1, "title " + String.valueOf(i));
+				pstmt.setString(2, "content " + String.valueOf(i));
 				
 				if (i % 4 != 1) {
 					int ref = (int) (Math.random() * i + 1);
