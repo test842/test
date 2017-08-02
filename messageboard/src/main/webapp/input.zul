@@ -16,7 +16,7 @@
 		<row>
 			<cell sclass="row-title">${labels.title} :</cell>
 			<cell>
-				<textbox value="@bind(fx.title)" />
+				<textbox constraint="no empty" value="@bind(fx.title)" />
 			</cell>
 		</row>
 		<row>

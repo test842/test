@@ -46,7 +46,7 @@ import cc.ar.messageboard.user.UserService;
 public class BoardViewModel {
 
 	private static final Logger logger = LoggerFactory.getLogger(BoardViewModel.class);
-	
+
 	@WireVariable
 	private TagService tagService;
 
@@ -160,7 +160,7 @@ public class BoardViewModel {
 	@Init
 	public void init() {
 		logger.debug("board view model init");
-		
+
 		currentUser = (UserBean) Sessions.getCurrent().getAttribute("currentUser");
 		logger.debug("current user id : {}", currentUser.getUid());
 		root = articleService.selectByUid(0).get(0);
@@ -217,7 +217,6 @@ public class BoardViewModel {
 					try {
 						logger.debug("try to gain access to current desktop");
 						Executions.activate(desktop);
-						logger.debug("clear variables after post");
 						BindUtils.postGlobalCommand(null, null, "clear", null);
 					} catch (DesktopUnavailableException e) {
 						logger.error("Desktop Unavailable Exception", e);
@@ -272,7 +271,7 @@ public class BoardViewModel {
 	}
 
 	@GlobalCommand
-	@NotifyChange({ "schedule", "newArticle" , "currentArticle" })
+	@NotifyChange({ "schedule", "newArticle", "currentArticle" })
 	public void clear() {
 		logger.debug("clear after post");
 		articlesCache.remove(newArticle.getAid());
@@ -293,7 +292,7 @@ public class BoardViewModel {
 	}
 
 	@Command
-	@NotifyChange("newArticle")
+	@NotifyChange({ "newArticle", "tags" })
 	public void newPost() {
 		logger.debug("create new article");
 		newArticle = new ArticleBean();
@@ -309,7 +308,6 @@ public class BoardViewModel {
 		tags.clear();
 		newArticle = null;
 	}
-	
 
 	@Command
 	@NotifyChange({ "currentArticle", "newArticle" })
