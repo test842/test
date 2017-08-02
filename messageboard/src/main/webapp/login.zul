@@ -2,7 +2,7 @@
 <zk>
 	<window apply="org.zkoss.bind.BindComposer"
 		viewModel="@id('vm') @init('cc.ar.messageboard.LoginViewModel')"
-		title="${labels.login}" border="normal" hflex="min">
+		title="${labels.login.$}" border="normal" hflex="min">
 		<vbox hflex="min" align="center">
 			<grid hflex="min">
 				<columns>
@@ -11,18 +11,18 @@
 				</columns>
 				<rows>
 					<row>
-						${labels.userid} :
+						${labels.login.userid} :
 						<intbox value="@save(vm.userBean.uid)" width="200px" constraint="no empty"/>
 					</row>
 					<row>
-						${labels.password} :
+						${labels.login.password} :
 						<textbox value="@save(vm.userBean.password)" type="password"
 							constraint="no empty" width="200px" />
 					</row>
 				</rows>
 			</grid>
 			<label sclass="warn" value="@load(vm.message)" />
-			<button onClick="@command('login')" label="${labels.login}" />
+			<button onClick="@command('login')" label="${labels.login.$}" />
 		</vbox>
 	</window>
 </zk>

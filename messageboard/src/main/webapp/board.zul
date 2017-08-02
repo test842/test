@@ -10,12 +10,12 @@
 				<hlayout>
 					<template name="top" src="/top.zul" />
 					<apply template="top"
-						header="@ref(labels.recentTopics)" model="@ref(vm.recentTopics)" />
+						header="@ref(labels.top.recentTopics)" model="@ref(vm.recentTopics)" />
 					<apply template="top"
-						header="@ref(labels.recentReplies)"
+						header="@ref(labels.top.recentReplies)"
 						model="@ref(vm.recentReplies)" />
 					<apply template="top"
-						header="@ref(labels.relateArticles)"
+						header="@ref(labels.top.relateArticles)"
 						model="@ref(vm.relateArticles)" />
 				</hlayout>
 			</north>

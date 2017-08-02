@@ -7,20 +7,20 @@
 	<rows>
 		<if test="@load((fx.ref != 0))">
 			<row>
-				<cell sclass="row-title">${labels.replyTo} :</cell>
+				<cell sclass="row-title">${labels.post.replyTo} :</cell>
 				<cell>
 					<label value="@load(fx.parent.title)" />
 				</cell>
 			</row>
 		</if>
 		<row>
-			<cell sclass="row-title">${labels.title} :</cell>
+			<cell sclass="row-title">${labels.article.title} :</cell>
 			<cell>
 				<textbox constraint="no empty" value="@bind(fx.title)" />
 			</cell>
 		</row>
 		<row>
-			<cell sclass="row-title">${labels.tags} :</cell>
+			<cell sclass="row-title">${labels.article.tags} :</cell>
 			<cell>
 				<chosenbox model="@load(vm.tagsModel)"
 					selectedObjects="@bind(vm.tags)">
@@ -29,21 +29,21 @@
 			</cell>
 		</row>
 		<row>
-			<cell sclass="row-title">${labels.content} :</cell>
+			<cell sclass="row-title">${labels.article.content} :</cell>
 			<cell>
 				<ckeditor value="@bind(fx.content)" />
 			</cell>
 		</row>
 		<row>
 			<cell>
-				<button label="${labels.reset}"
+				<button label="${labels.post.reset}"
 					onClick="@command('newPost')" />
 			</cell>
 			<cell>
-				<button label="@load(labels.submit)"
+				<button label="@load(labels.post.submit)"
 					onClick="@command('post')" disabled="@load(not empty vm.schedule)" />
 				<if test="@load(not empty vm.schedule)">
-					<button label="@load(labels.cancel)"
+					<button label="@load(labels.post.cancel)"
 						onClick="@command('cancel')" />
 				</if>
 				<button label="${labels.close}"

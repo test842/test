@@ -5,31 +5,31 @@
 	</columns>
 	<rows>
 		<row>
-			<cell sclass="row-title">${labels.title} :</cell>
+			<cell sclass="row-title">${labels.article.title} :</cell>
 			<cell>
 				<label value="@load(article.title)" />
 			</cell>
 		</row>
 		<row>
-			<cell sclass="row-title">${labels.author} :</cell>
+			<cell sclass="row-title">${labels.article.author} :</cell>
 			<cell>
 				<label value="@load(article.user.name)" />
 			</cell>
 		</row>
 		<row>
-			<cell sclass="row-title">${labels.date} :</cell>
+			<cell sclass="row-title">${labels.article.date} :</cell>
 			<cell>
 				<label value="@load(article.date)" />
 			</cell>
 		</row>
 		<row>
-			<cell sclass="row-title">${labels.tags} :</cell>
+			<cell sclass="row-title">${labels.article.tags} :</cell>
 			<cell>
 				<label value="@load(article.tags)" />
 			</cell>
 		</row>
 		<row>
-			<cell sclass="row-title">${labels.content} :</cell>
+			<cell sclass="row-title">${labels.article.content} :</cell>
 			<cell>
 				<html content="@load(article.content)" />
 			</cell>
@@ -37,15 +37,15 @@
 		<row>
 			<cell />
 			<cell>
-				<button label="${labels.reply}"
+				<button label="${labels.article.reply}"
 					onClick="@command('reply', article = article)" />
 				<button
 					visible="@load((empty article.replies) and (vm.currentUser.uid eq article.user.uid))"
-					label="${labels.edit}"
+					label="${labels.article.edit}"
 					onClick="@command('edit',  article = article)" />
 				<button
 					visible="@load(vm.currentUser.uid eq article.user.uid)"
-					label="${labels.delete}"
+					label="${labels.article.delete}"
 					onClick="@command('delete',  article = article)" />
 				<button label="${labels.close}"
 					onClick="@command('close')" />
