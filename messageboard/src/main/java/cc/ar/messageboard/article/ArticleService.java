@@ -29,27 +29,27 @@ public class ArticleService {
 
 	@Transactional
 	public boolean insert(ArticleBean bean, Set<TagBean> tags) {
-		logger.debug("insert article and its tags");
 		if (bean != null) {
+			logger.info("insert article, article's title = {}, author id = {}", bean.getTitle(), bean.getUid());
 			return articleDao.insert(bean) && editTags(tags, bean);
 		}
-		logger.debug("articlebean is null");
+		logger.error("insert article but bean is null");
 		return false;
 	}
 
 	@Transactional
 	public boolean update(ArticleBean bean, Set<TagBean> tags) {
-		logger.debug("edit article, aid = {}", bean.getAid());
 		if (bean != null && articleDao.selectReplies(bean.getAid()).isEmpty()) {
+			logger.info("edit article, aid = {}", bean.getAid()); 
 			return articleDao.update(bean) && editTags(tags, bean);
 		}
-		logger.debug("articlebean is null or cannot edit");
+		logger.error("edit article but bean is null or cannot edit"); //
 		return false;
 	}
 
 	@Transactional
 	public boolean delete(Integer aid) {
-		logger.debug("hide article, aid = {}", aid);
+		logger.info("hide article and its replies, aid = {}", aid);
 		if (aid != null) {
 			boolean result = true;
 			logger.debug("hide replies of article recusively");
@@ -60,7 +60,7 @@ public class ArticleService {
 			logger.debug("all replies of article (aid = {}) have been hidden", aid);
 			return articleDao.delete(aid) && result;
 		}
-		logger.debug("aid is null");
+		logger.error("aid is null");
 		return false;
 	}
 
@@ -70,7 +70,7 @@ public class ArticleService {
 		if (uid != null) {
 			return articleDao.selectByUid(uid);
 		}
-		logger.debug("uid is null");
+		logger.error("uid is null");
 		return null;
 	}
 
@@ -86,7 +86,7 @@ public class ArticleService {
 		if (ref != null) {
 			return articleDao.selectReplies(ref);
 		}
-		logger.debug("ref is null");
+		logger.error("ref is null");
 		return null;
 	}
 
@@ -129,7 +129,7 @@ public class ArticleService {
 			}
 			return true;
 		}
-		logger.debug("article is null");
+		logger.error("article is null");
 		return false;
 	}
 }

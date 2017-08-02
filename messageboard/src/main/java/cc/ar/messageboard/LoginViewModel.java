@@ -45,9 +45,8 @@ public class LoginViewModel {
 	@Command
 	@NotifyChange("message")
 	public void login() { 
-		logger.debug("login on click button");
 		if (userBean.getUid() == null || userBean.getPassword() == null) {
-			logger.debug("uid or password is null");
+			logger.error("uid or password is null");
 			message = "no empty";
 		} else {
 			UserBean user = userService.login(userBean);

@@ -18,14 +18,23 @@ public class UserService {
 	
 	@Transactional(readOnly = true)
 	public UserBean login(UserBean info) {
-		if (info != null && info.getUid() != null && info.getPassword() != null) {
-			logger.debug("try to login, user id : {} ", info.getUid());
-			UserBean bean = userDao.select(info.getUid());
-			if (bean != null && bean.getPassword().equals(info.getPassword())) 
-				return bean;
+		if (info != null) {
+			Integer uid = info.getUid();
+			String password = info.getPassword();
+			logger.debug("try to login, user id : {} ", uid);
+			
+			if (uid != null && password != null) {
+				UserBean bean = userDao.select(uid);
+				if (bean != null && bean.getPassword().equals(password)) {
+					logger.info("user login,uid = {}", uid);
+					return bean;
+				}
+				return null;
+			}
+			logger.error("user id or password is null");
 			return null;
 		}
-		logger.debug(info == null ? "login info is null" : "user id or password is null");
+		logger.error("login info is null");
 		return null;
 	}
 	
@@ -34,7 +43,7 @@ public class UserService {
 		logger.debug("select userbean by uid = {}", uid);
 		if (uid != null)
 			return userDao.select(uid);
-		logger.debug("uid is null");
+		logger.error("uid is null");
 		return null;
 	}
 }

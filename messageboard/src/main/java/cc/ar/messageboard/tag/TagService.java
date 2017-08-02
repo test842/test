@@ -23,7 +23,7 @@ public class TagService {
 		logger.debug("select tagbean by tid = {}", tid);
 		if (tid != null)
 			return tagDao.select(tid);
-		logger.debug("tid is null");
+		logger.error("tid is null");
 		return null;
 	}
 	
@@ -38,7 +38,7 @@ public class TagService {
 		logger.debug("select tagbean by tagname = {}", tagname);
 		if (tagname != null)
 			return tagDao.selectByTagName(tagname);
-		logger.debug("tagname is null");
+		logger.error("tagname is null");
 		return null;
 	}
 

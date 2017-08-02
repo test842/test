@@ -24,7 +24,7 @@ public class TagDetailService {
 		logger.debug("insert tag, tid = {} for aid = {}", tid, aid);
 		if (aid != null && tid != null) 
 			return tagDetailDao.insert(aid, tid);
-		logger.debug("tid or aid is null");
+		logger.error("tid or aid is null");
 		return false;
 	}
 	
@@ -34,7 +34,7 @@ public class TagDetailService {
 		if (aid != null && tid != null) {
 			return tagDetailDao.delete(aid, tid);
 		}
-		logger.debug("tid or aid is null");
+		logger.error("tid or aid is null");
 		return false;
 	}
 	
@@ -44,7 +44,7 @@ public class TagDetailService {
 		if (aid != null) {
 			return tagDetailDao.selectByAid(aid);
 		}
-		logger.debug("aid is null");
+		logger.error("aid is null");
 		return null;
 	}
 }

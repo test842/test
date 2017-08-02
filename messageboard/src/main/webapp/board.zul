@@ -9,14 +9,9 @@
 				visible="@load(empty vm.currentArticle)">
 				<hlayout>
 					<template name="top" src="/top.zul" />
-					<apply template="top"
-						header="@ref(labels.top.recentTopics)" model="@ref(vm.recentTopics)" />
-					<apply template="top"
-						header="@ref(labels.top.recentReplies)"
-						model="@ref(vm.recentReplies)" />
-					<apply template="top"
-						header="@ref(labels.top.relateArticles)"
-						model="@ref(vm.relateArticles)" />
+					<apply template="top" header="@load(labels.top.recentTopics)" model="@load(vm.recentTopics)" />
+					<apply template="top" header="@load(labels.top.recentReplies)" model="@load(vm.recentReplies)" />
+					<apply template="top" header="@load(labels.top.relateArticles)" model="@load(vm.relateArticles)" />
 				</hlayout>
 			</north>
 			<center>
@@ -28,7 +23,7 @@
 					<template name="article" src="/article.zul" />
 					<template name="reply" src="/reply.zul" />
 					<apply template="article"
-						article="@ref(vm.currentArticle)" />
+						article="@load(vm.currentArticle)" />
 					<if test="@load((vm.view == 1) and (not empty vm.currentArticle.replies))">
 						<apply template="reply" replies="@load(vm.currentArticle.replies)" />
 					</if>

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zkoss.zul.AbstractTreeModel;
 
 
@@ -15,19 +17,13 @@ public class ArticleTreeModel extends AbstractTreeModel<ArticleBean> {
 	
 	private ArticleBean root;
 	
-	private Map<Integer, ArrayList<ArticleBean>> map = new HashMap<Integer, ArrayList<ArticleBean>>();
+	private Map<Integer, ArrayList<ArticleBean>> map;
 	
-	public ArticleTreeModel(ArticleBean root) {
-		super(root);
-		this.root = root;
-	}
-	
-	public ArticleTreeModel(ArticleBean root, ArticleService articleService, Map<Integer, ArrayList<ArticleBean>> map) {
+	public ArticleTreeModel(ArticleBean root, ArticleService articleService) {
 		super(root);
 		this.articleService = articleService;
 		this.root = root;
-		if (map != null)
-			this.map = map;
+		map = new HashMap<Integer, ArrayList<ArticleBean>>();
 	}
 
 	public boolean isLeaf(ArticleBean node) {
