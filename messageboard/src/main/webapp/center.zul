@@ -11,7 +11,7 @@
 	<choose>
 		<when test="@load((vm.view == 0))">
 			<tree model="@load(vm.articleTreeModel)" height="250px"
-				selectedItem="@bind(vm.currentArticle)"
+				selectedItem="@save(vm.currentArticle)"
 				onSelect="@command('doTreeSelect')">
 				<treecols>
 					<treecol label="${labels.article.title}" />
@@ -30,7 +30,7 @@
 		<when test="@load((vm.view == 1))">
 			<listbox model="@load(vm.allTopics)" height="250px"
 				onSelect="@command('doListSelect')"
-				selectedItem="@bind(vm.currentArticle)">
+				selectedItem="@save(vm.currentArticle)">
 				<listhead>
 					<listheader label="${labels.article.title}" hflex="1" />
 					<listheader label="${labels.article.date}" hflex="1" />

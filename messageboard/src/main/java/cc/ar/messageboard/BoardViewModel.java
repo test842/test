@@ -370,12 +370,7 @@ public class BoardViewModel {
 		logger.debug("get details of article, aid = {}", aid);
 		ArticleBean current = articlesCache.get(aid); 
 		if (current == null) {
-			current = article;	
-			
-			ArticleBean temp = articleService.select(aid);
-			current.setTitle(temp.getTitle());
-			current.setContent(temp.getContent());
-			
+			current = articleService.select(aid);
 			current.setUser(userService.selectByUid(current.getUid()));
 
 			StringBuilder sb = new StringBuilder();
