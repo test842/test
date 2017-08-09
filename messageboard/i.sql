@@ -3,6 +3,7 @@ drop table tag
 drop table article
 drop table user
 
+
 create table user (
 	uid integer identity primary key,
 	name varchar(30) not null,
